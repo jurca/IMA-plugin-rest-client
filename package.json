@@ -1,0 +1,28 @@
+{
+  "name": "ima-plugin-rest-client",
+  "version": "0.0.0",
+  "description": "Generic REST API client plugin for the IMA application framework.",
+  "main": "RestClient.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jurca/IMA-plugin-rest-client.git"
+  },
+  "keywords": [
+    "ima",
+    "ima.js",
+    "plugin",
+    "rest"
+  ],
+  "author": "Martin Jurča <martin.jurca@firma.seznam.cz>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jurca/IMA-plugin-rest-client/issues"
+  },
+  "homepage": "https://github.com/jurca/IMA-plugin-rest-client#readme",
+  "dependencies": {
+    "clone": "^1.0.2"
+  }
+}
