@@ -11,7 +11,6 @@ export default class Response {
 	 *
 	 * @param {{
 	 *     status: number,
-	 *     statusName: string,
 	 *     headers: Object<string, string>.
 	 *     body: *,
 	 *     cached: boolean,
@@ -26,13 +25,6 @@ export default class Response {
 		 * @type {number}
 		 */
 		this.status = responseData.status;
-
-		/**
-		 * The human-readable representation of the HTTP response status code.
-		 *
-		 * @type {string}
-		 */
-		this.statusName = responseData.statusName;
 
 		/**
 		 * The response headers. The keys are header names in lower-case, the
