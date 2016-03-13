@@ -46,7 +46,8 @@ export default class RestClient {
 	 *
 	 * @param {*} resource The resource from which the entity should be
 	 *        retrieved.
-	 * @param {(number|string)} id The ID identifying the entity to retrieve.
+	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
+	 *        entity or group of entities to retrieve.
 	 * @param {Object<string, (number|string)>=} parameters The additional
 	 *        parameters to send to the server with the request to configure
 	 *        the server's response.
@@ -77,7 +78,8 @@ export default class RestClient {
 	 * REST API.
 	 *
 	 * @param {*} resource The resource in which the entity should be modified.
-	 * @param {(number|string)} id The ID identifying the entity to modify.
+	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
+	 *        entity or group of entities to modify.
 	 * @param {*} data The data representing the modifications to make to the
 	 *        entity..
 	 * @param {{
@@ -102,7 +104,8 @@ export default class RestClient {
 	 * API.
 	 *
 	 * @param {*} resource The resource in which the entity should be created.
-	 * @param {(number|string)} id The ID identifying the entity to replace.
+	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
+	 *        entity or group of entities to replace.
 	 * @param {*} data The data representing the entity.
 	 * @param {{
 	 *     timeout: number=,
@@ -150,7 +153,8 @@ export default class RestClient {
 	 *
 	 * @param {*} resource The resource from which the entity should be
 	 *        deleted.
-	 * @param {(number|string)} id The ID identifying the entity to delete.
+	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
+	 *        entity or group of entities to delete.
 	 * @param {{
 	 *     timeout: number=,
 	 *     ttl: number=,

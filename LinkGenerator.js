@@ -11,9 +11,10 @@ export default class LinkGenerator {
 	 * resource.
 	 *
 	 * @param {*} resource The identifier of the REST resource.
-	 * @param {?(number|string)} id Unique ID of a single entity to access
-	 *        within the specified resource, or {@code null} if the resource
-	 *        itself should be accessed.
+	 * @param {?(number|string|(number|string)[])} id Unique ID(s) of a single
+	 *        entity or a group of entities to access within the specified
+	 *        resource, or {@code null} if the resource itself should be
+	 *        accessed.
 	 * @param {Object<string, (number|string)>} parameters Additional
 	 *        parameters to use to generate the access URL.
 	 * @param {?Object<string, *>} serverConfiguration Configuration of the
