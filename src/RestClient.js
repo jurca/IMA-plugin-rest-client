@@ -29,10 +29,14 @@ export default class RestClient {
 	 *     withCredentials: boolean=
 	 * }=} options Request options. See the documentation of the HTTP agent for
 	 *     more details.
+	 * @param {*} parentEntity The parent entity within which the specified
+	 *        resource will be manipulated. It may be needed to determine the
+	 *        parent resource from the entity. Use {@code null} if the
+	 *        specified resource is a top-level resource within the REST API.
 	 * @return {Promise<Response>} A promise that will resolve to the server's
 	 *         response.
 	 */
-	list(resource, parameters = {}, options = {}) {}
+	list(resource, parameters = {}, options = {}, parentEntity = null) {}
 
 	/**
 	 * Retrieves the specified entity form the specified REST resource.
@@ -60,10 +64,14 @@ export default class RestClient {
 	 *     withCredentials: boolean=
 	 * }=} options Request options. See the documentation of the HTTP agent for
 	 *     more details.
+	 * @param {*} parentEntity The parent entity within which the specified
+	 *        resource will be manipulated. It may be needed to determine the
+	 *        parent resource from the entity. Use {@code null} if the
+	 *        specified resource is a top-level resource within the REST API.
 	 * @return {Promise<Response>} A promise that will resolve to the server's
 	 *         response.
 	 */
-	get(resource, id, parameters = {}, options = {}) {}
+	get(resource, id, parameters = {}, options = {}, parentEntity = null) {}
 
 	/**
 	 * Patches the specified entity in the specified REST resource using the
@@ -91,10 +99,14 @@ export default class RestClient {
 	 *     withCredentials: boolean=
 	 * }=} options Request options. See the documentation of the HTTP agent for
 	 *     more details.
+	 * @param {*} parentEntity The parent entity within which the specified
+	 *        resource will be manipulated. It may be needed to determine the
+	 *        parent resource from the entity. Use {@code null} if the
+	 *        specified resource is a top-level resource within the REST API.
 	 * @return {Promise<Response>} A promise that will resolve to the server's
 	 *         response.
 	 */
-	patch(resource, id, data, options = {}) {}
+	patch(resource, id, data, options = {}, parentEntity = null) {}
 
 	/**
 	 * Replaces the specified entity in the specified REST resource by a new
@@ -116,10 +128,14 @@ export default class RestClient {
 	 *     withCredentials: boolean=
 	 * }=} options Request options. See the documentation of the HTTP agent for
 	 *     more details.
+	 * @param {*} parentEntity The parent entity within which the specified
+	 *        resource will be manipulated. It may be needed to determine the
+	 *        parent resource from the entity. Use {@code null} if the
+	 *        specified resource is a top-level resource within the REST API.
 	 * @return {Promise<Response>} A promise that will resolve to the server's
 	 *         response.
 	 */
-	replace(resource, id, data, options = {}) {}
+	replace(resource, id, data, options = {}, parentEntity = null) {}
 
 	/**
 	 * Creates a new entity using the provided data in the specified REST
@@ -139,10 +155,14 @@ export default class RestClient {
 	 *     withCredentials: boolean=
 	 * }=} options Request options. See the documentation of the HTTP agent for
 	 *     more details.
+	 * @param {*} parentEntity The parent entity within which the specified
+	 *        resource will be manipulated. It may be needed to determine the
+	 *        parent resource from the entity. Use {@code null} if the
+	 *        specified resource is a top-level resource within the REST API.
 	 * @return {Promise<Response>} A promise that will resolve to the server's
 	 *         response.
 	 */
-	create(resource, data, options = {}) {}
+	create(resource, data, options = {}, parentEntity = null) {}
 
 	/**
 	 * Deletes the resource entity identified by the specified ID from the
@@ -164,8 +184,12 @@ export default class RestClient {
 	 *     withCredentials: boolean=
 	 * }=} options Request options. See the documentation of the HTTP agent for
 	 *     more details.
+	 * @param {*} parentEntity The parent entity within which the specified
+	 *        resource will be manipulated. It may be needed to determine the
+	 *        parent resource from the entity. Use {@code null} if the
+	 *        specified resource is a top-level resource within the REST API.
 	 * @return {Promise<Response>} A promise that will resolve to the server's
 	 *         response.
 	 */
-	delete(resource, id, options = {}) {}
+	delete(resource, id, options = {}, parentEntity = null) {}
 }

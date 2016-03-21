@@ -9,6 +9,7 @@ export default class Request {
 	 * Initializes the request representation using the provided data.
 	 *
 	 * @param {{
+	 *     parentEntity: *,
 	 *     resource: *,
 	 *     parameters: ?Object<string, (number|string)>,
 	 *     method: string,
@@ -27,6 +28,15 @@ export default class Request {
 	 *        this class for more information.
 	 */
 	constructor(requestData) {
+		/**
+		 * The parent entity within which the specified resource to manipulate.
+		 * Set to {@code null} if the request's target resource is a top-level
+		 * resource within the REST API.
+		 * 
+		 * @type {*}
+		 */
+		this.parentEntity = requestData.parentEntity;
+		
 		/**
 		 * The identifier of the REST API resource to access using this
 		 * request.

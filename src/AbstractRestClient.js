@@ -90,9 +90,10 @@ export default class AbstractRestClient extends RestClient {
 	 * @inheritdoc
 	 * @override
 	 */
-	list(resource, parameters = {}, options = {}) {
+	list(resource, parameters = {}, options = {}, parentEntity = null) {
 		return this._prepareAndExecuteRequest(
 			HttpMethod.GET,
+			parentEntity,
 			resource,
 			null,
 			parameters,
@@ -105,9 +106,10 @@ export default class AbstractRestClient extends RestClient {
 	 * @inheritdoc
 	 * @override
 	 */
-	get(resource, id, parameters = {}, options = {}) {
+	get(resource, id, parameters = {}, options = {}, parentEntity = null) {
 		return this._prepareAndExecuteRequest(
 			HttpMethod.GET,
+			parentEntity,
 			resource,
 			id,
 			parameters,
@@ -120,9 +122,10 @@ export default class AbstractRestClient extends RestClient {
 	 * @inheritdoc
 	 * @override
 	 */
-	patch(resource, id, data, options = {}) {
+	patch(resource, id, data, options = {}, parentEntity = null) {
 		return this._prepareAndExecuteRequest(
 			HttpMethod.PATCH,
+			parentEntity,
 			resource,
 			id,
 			{},
@@ -135,9 +138,10 @@ export default class AbstractRestClient extends RestClient {
 	 * @inheritdoc
 	 * @override
 	 */
-	replace(resource, id, data, options = {}) {
+	replace(resource, id, data, options = {}, parentEntity = null) {
 		return this._prepareAndExecuteRequest(
 			HttpMethod.PUT,
+			parentEntity,
 			resource,
 			id,
 			{},
@@ -150,9 +154,10 @@ export default class AbstractRestClient extends RestClient {
 	 * @inheritdoc
 	 * @override
 	 */
-	create(resource, data, options = {}) {
+	create(resource, data, options = {}, parentEntity = null) {
 		return this._prepareAndExecuteRequest(
 			HttpMethod.POST,
+			parentEntity,
 			resource,
 			null,
 			{},
@@ -165,9 +170,10 @@ export default class AbstractRestClient extends RestClient {
 	 * @inheritdoc
 	 * @override
 	 */
-	delete(resource, id, options = {}) {
+	delete(resource, id, options = {}, parentEntity = null) {
 		return this._prepareAndExecuteRequest(
 			HttpMethod.DELETE,
+			parentEntity,
 			resource,
 			id,
 			{},
@@ -187,6 +193,10 @@ export default class AbstractRestClient extends RestClient {
 	 *
 	 * @private
 	 * @param {string} method The HTTP method to use when making the request.
+	 * @param {*} parentEntity The parent entity within which the specified
+	 *        resource will be manipulated. It may be needed to determine the
+	 *        parent resource from the entity. Use {@code null} if the
+	 *        specified resource is a top-level resource within the REST API.
 	 * @param {*} resource The REST resource to access.
 	 * @param {?(number|string|(number|string)[])} id The ID(s) identifying the
 	 *        entity or group of entities to access.
@@ -204,8 +214,8 @@ export default class AbstractRestClient extends RestClient {
 	 *        HTTP agent.
 	 * @return {Promise<Response>} The post-processed server's response.
 	 */
-	_prepareAndExecuteRequest(method, resource, id, parameters, data,
-			options) {
+	_prepareAndExecuteRequest(method, parentEntity, resource, id, parameters,
+			data, options) {
 		return Promise.resolve().then(() => {
 			if (this._configurator && !this._serverConfigurationFetched) {
 				return this._configurator.getConfiguration().then((config) => {
@@ -214,8 +224,14 @@ export default class AbstractRestClient extends RestClient {
 				});
 			}
 		}).then(() => {
-			let url = this._generateUrl(resource, id, parameters);
+			let url = this._generateUrl(
+				parentEntity,
+				resource,
+				id,
+				parameters
+			);
 			let request = this._createRequest(
+				parentEntity,
 				resource,
 				parameters,
 				method,
@@ -233,6 +249,10 @@ export default class AbstractRestClient extends RestClient {
 	 * information.
 	 *
 	 * @private
+	 * @param {*} parentEntity The parent entity within which the specified
+	 *        resource will be manipulated. It may be needed to determine the
+	 *        parent resource from the entity. Use {@code null} if the
+	 *        specified resource is a top-level resource within the REST API.
 	 * @param {*} resource The resource to be accessed in the REST API.
 	 * @param {?(number|string|(number|string)[])} id The ID of the entity or
 	 *        entities to access.
@@ -240,8 +260,9 @@ export default class AbstractRestClient extends RestClient {
 	 *        parameters to use when generating the URL.
 	 * @return {string} The generated URL.
 	 */
-	_generateUrl(resource, id, parameters) {
+	_generateUrl(parentEntity, resource, id, parameters) {
 		return this._linkGenerator.createLink(
+			parentEntity,
 			resource,
 			id,
 			parameters,
@@ -253,6 +274,10 @@ export default class AbstractRestClient extends RestClient {
 	 * Creates a new request object from the provided data.
 	 *
 	 * @private
+	 * @param {*} parentEntity The parent entity within which the specified
+	 *        resource will be manipulated. It may be needed to determine the
+	 *        parent resource from the entity. Use {@code null} if the
+	 *        specified resource is a top-level resource within the REST API.
 	 * @param {*} resource The resource to be accessed in the REST API.
 	 * @param {Object<string, (number|string)>} parameters Additional
 	 *        parameters that were used to generate the URL.
@@ -270,12 +295,14 @@ export default class AbstractRestClient extends RestClient {
 	 *        HTTP agent.
 	 * @return {Request} The created request.
 	 */
-	_createRequest(resource, parameters, method, url, data, rawOptions) {
+	_createRequest(parentEntity, resource, parameters, method, url, data,
+			rawOptions) {
 		let options = Object.assign({}, rawOptions);
 		let headers = options.headers || {};
 		delete options.headers;
 
 		return new Request({
+			parentEntity,
 			resource,
 			parameters,
 			method,
