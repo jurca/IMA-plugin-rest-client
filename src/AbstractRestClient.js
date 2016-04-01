@@ -26,6 +26,8 @@ export default class AbstractRestClient extends RestClient {
 	 */
 	constructor(httpAgent, configurator, linkGenerator, preProcessors,
 			postProcessors) {
+		super();
+
 		/**
 		 * The IMA HTTP agent to use to execute requests.
 		 *
