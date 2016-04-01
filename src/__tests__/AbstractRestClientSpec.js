@@ -422,10 +422,15 @@ describe('AbstractRestClient', () => {
 	it('should allow preProcessors to generate a response', () => {});
 
 	it('should execute a GET request when list() is called', () => {});
+
 	it('should execute a GET request when get() is called', () => {});
-	it('should execute a GET request when patch() is called', () => {});
-	it('should execute a GET request when replace() is called', () => {});
-	it('should execute a GET request when create() is called', () => {});
-	it('should execute a GET request when delete() is called', () => {});
+
+	it('should execute a PATCH request when patch() is called', () => {});
+
+	it('should execute a PUT request when replace() is called', () => {});
+
+	it('should execute a POST request when create() is called', () => {});
+
+	it('should execute a DELETE request when delete() is called', () => {});
 
 });
