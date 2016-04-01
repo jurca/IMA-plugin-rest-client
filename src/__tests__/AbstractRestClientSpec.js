@@ -11,6 +11,30 @@ describe('AbstractRestClient', () => {
 
 	class DummyRestClient extends AbstractRestClient {}
 
+	class DummyLinkGenerator extends LinkGenerator {
+		createLink(parentEntity, resource, id, parameters, serverConfig) {
+			return `http://server.api/${resource}`;
+		}
+	}
+
+	class DummyHttpAgent {
+		get(url, data, options) {
+			return Promise.resolve({
+				status: 200,
+				body: { stuff: 'stuff too' },
+				params: {
+					method: 'GET',
+					url,
+					transformedUrl: url,
+					data,
+					headers: options.headers
+				},
+				headers: {},
+				cached: false
+			});
+		}
+	}
+
 	it('should follow the correct call chain', (done) => {
 		let configuratorCalled = false;
 		let linkGeneratorCalled = false;
@@ -366,7 +390,34 @@ describe('AbstractRestClient', () => {
 		});
 	});
 
-	it('should call configurator only once', () => {});
+	it('should call configurator only once', (done) => {
+		let callCount = 0;
+
+		let configurator = new (class extends Configurator {
+			getConfiguration() {
+				callCount++;
+				return Promise.resolve({ configGenerated: true });
+			}
+		});
+
+		let restClient = new DummyRestClient(
+			new DummyHttpAgent(),
+			configurator,
+			new DummyLinkGenerator(),
+			[],
+			[]
+		);
+
+		return restClient.get('foo', 1).then((response) => {
+			return restClient.get('bar', 2);
+		}).then((response) => {
+			expect(callCount).toBe(1);
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
 
 	it('should allow preProcessors to generate a response', () => {});
 
