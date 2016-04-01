@@ -389,7 +389,7 @@ export default class AbstractRestClient extends RestClient {
 		return this._httpAgent[methodName](
 			request.url,
 			request.data || {},
-			request.options
+			Object.assign({}, request.options, { headers: request.headers })
 		).then((agentResponse) => {
 			return new Response({
 				status: agentResponse.status,
