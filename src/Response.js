@@ -32,7 +32,7 @@ export default class Response {
 		 *
 		 * @type {Object<string, string>}
 		 */
-		this.headers = Object.assign({}, responseData.headers);
+		this.headers = Object.freeze(Object.assign({}, responseData.headers));
 
 		/**
 		 * The response of the body, already parsed according to the value of
@@ -41,6 +41,9 @@ export default class Response {
 		 * @type {*}
 		 */
 		this.body = clone(responseData.body);
+		if (this.body && (typeof this.body === 'object')) {
+			Object.freeze(this.body);
+		}
 
 		/**
 		 * The flag signalling whether this request was handled by the HTTP
@@ -56,5 +59,7 @@ export default class Response {
 		 * @type {Request}
 		 */
 		this.request = new Request(responseData.request);
+		
+		Object.freeze(this);
 	}
 }

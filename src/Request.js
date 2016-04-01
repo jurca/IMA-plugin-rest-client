@@ -55,7 +55,7 @@ export default class Request {
 		 * @type {?Object<string, (number|string)>}
 		 */
 		this.parameters = requestData.parameters &&
-				Object.assign({}, requestData.parameters);
+				Object.freeze(Object.assign({}, requestData.parameters));
 
 		/**
 		 * The HTTP method to use to make the request. The method is specified
@@ -79,6 +79,9 @@ export default class Request {
 		 * @type {*}
 		 */
 		this.data = clone(requestData.data);
+		if (this.data && (typeof this.data === 'object')) {
+			Object.freeze(this.data);
+		}
 
 		/**
 		 * The headers to send with the HTTP request to the server. These are
@@ -87,7 +90,7 @@ export default class Request {
 		 *
 		 * @type {Object<string, string>}
 		 */
-		this.headers = Object.assign({}, requestData.headers);
+		this.headers = Object.freeze(Object.assign({}, requestData.headers));
 
 		/**
 		 * HTTP request options, without the request headers.
@@ -100,7 +103,7 @@ export default class Request {
 		 *     withCredentials: boolean=
 		 * }}
 		 */
-		this.options = Object.assign({}, requestData.options);
+		this.options = Object.freeze(Object.assign({}, requestData.options));
 
 		/**
 		 * The REST API client configuration provided by the server. The field
@@ -109,5 +112,10 @@ export default class Request {
 		 * @type {?Object<string, *>}
 		 */
 		this.serverConfiguration = clone(requestData.serverConfiguration);
+		if (this.serverConfiguration) {
+			Object.freeze(this.serverConfiguration);
+		}
+		
+		Object.freeze(this);
 	}
 }
