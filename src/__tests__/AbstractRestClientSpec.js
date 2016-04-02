@@ -419,7 +419,69 @@ describe('AbstractRestClient', () => {
 		});
 	});
 
-	it('should allow preProcessors to generate a response', () => {});
+	it('should allow preProcessors to generate a response', () => {
+		let preProcessorCalled = false;
+		let agentCalled = false;
+		let postProcessorCalled = false;
+		
+		let preProcessor = new (class extends RequestPreProcessor {
+			process(request) {
+				expect(preProcessorCalled).toBe(false);
+				preProcessorCalled = true;
+				
+				return new Response({
+					status: 201,
+					headers: {},
+					body: null,
+					cached: false,
+					request
+				});
+			}
+		});
+		
+		let agent = new (class extends DummyHttpAgent {
+			get(url, data, options) {
+				throw new Error('The HTTP agent must not be invoked');
+			}
+		});
+		
+		let postProcessor = new (class extends ResponsePostProcessor {
+			process(response) {
+				expect(preProcessorCalled).toBe(true);
+				expect(agentCalled).toBe(false);
+				expect(postProcessorCalled).toBe(false);
+				postProcessorCalled = true;
+				
+				expect(response.status).toBe(201);
+				expect(response.headers).toEqual({});
+				expect(response.body).toBeNull();
+				expect(response.cached).toBe(false);
+				
+				return new Response(Object.assign({}, response, {
+					status: 204
+				}));
+			}
+		});
+
+		let restClient = new DummyRestClient(
+			agent,
+			null,
+			new DummyLinkGenerator(),
+			[preProcessor],
+			[postProcessor]
+		);
+
+		return restClient.get('foo', 1).then((response) => {
+			expect(postProcessorCalled).toBe(true);
+			expect(agentCalled).toBe(false);
+			expect(response.status).toBe(204);
+			
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
 
 	it('should execute a GET request when list() is called', () => {});
 
