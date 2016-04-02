@@ -33,6 +33,22 @@ describe('AbstractRestClient', () => {
 				cached: false
 			});
 		}
+		
+		post(url, data, options) {
+			return this.get(url, data, options);
+		}
+		
+		put(url, data, options) {
+			return this.get(url, data, options);
+		}
+		
+		patch(url, data, options) {
+			return this.get(url, data, options);
+		}
+		
+		delete(url, data, options) {
+			return this.get(url, data, options);
+		}
 	}
 
 	it('should follow the correct call chain', (done) => {
@@ -419,7 +435,7 @@ describe('AbstractRestClient', () => {
 		});
 	});
 
-	it('should allow preProcessors to generate a response', () => {
+	it('should allow preProcessors to generate a response', (done) => {
 		let preProcessorCalled = false;
 		let agentCalled = false;
 		let postProcessorCalled = false;
@@ -483,16 +499,160 @@ describe('AbstractRestClient', () => {
 		});
 	});
 
-	it('should execute a GET request when list() is called', () => {});
+	it('should execute a GET request when list() is called', (done) => {
+		let methodCalled = false;
+		
+		let restClient = new DummyRestClient(
+			new (class extends DummyHttpAgent {
+				get(url, data, options) {
+					expect(methodCalled).toBe(false);
+					methodCalled = true;
+					return super.get(url, data, options);
+				}
+			}),
+			null,
+			new DummyLinkGenerator(),
+			[],
+			[]
+		);
+		
+		return restClient.list('foo').then((response) => {
+			expect(methodCalled).toBe(true);
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
 
-	it('should execute a GET request when get() is called', () => {});
+	it('should execute a GET request when get() is called', (done) => {
+		let methodCalled = false;
 
-	it('should execute a PATCH request when patch() is called', () => {});
+		let restClient = new DummyRestClient(
+			new (class extends DummyHttpAgent {
+				get(url, data, options) {
+					expect(methodCalled).toBe(false);
+					methodCalled = true;
+					return super.get(url, data, options);
+				}
+			}),
+			null,
+			new DummyLinkGenerator(),
+			[],
+			[]
+		);
 
-	it('should execute a PUT request when replace() is called', () => {});
+		return restClient.get('foo', 1).then((response) => {
+			expect(methodCalled).toBe(true);
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
 
-	it('should execute a POST request when create() is called', () => {});
+	it('should execute a PATCH request when patch() is called', (done) => {
+		let methodCalled = false;
 
-	it('should execute a DELETE request when delete() is called', () => {});
+		let restClient = new DummyRestClient(
+			new (class extends DummyHttpAgent {
+				patch(url, data, options) {
+					expect(methodCalled).toBe(false);
+					methodCalled = true;
+					return super.patch(url, data, options);
+				}
+			}),
+			null,
+			new DummyLinkGenerator(),
+			[],
+			[]
+		);
+
+		return restClient.patch('foo', 1, {}).then((response) => {
+			expect(methodCalled).toBe(true);
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
+
+	it('should execute a PUT request when replace() is called', (done) => {
+		let methodCalled = false;
+
+		let restClient = new DummyRestClient(
+			new (class extends DummyHttpAgent {
+				put(url, data, options) {
+					expect(methodCalled).toBe(false);
+					methodCalled = true;
+					return super.put(url, data, options);
+				}
+			}),
+			null,
+			new DummyLinkGenerator(),
+			[],
+			[]
+		);
+
+		return restClient.replace('foo', 1, {}).then((response) => {
+			expect(methodCalled).toBe(true);
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
+
+	it('should execute a POST request when create() is called', (done) => {
+		let methodCalled = false;
+
+		let restClient = new DummyRestClient(
+			new (class extends DummyHttpAgent {
+				post(url, data, options) {
+					expect(methodCalled).toBe(false);
+					methodCalled = true;
+					return super.get(url, data, options);
+				}
+			}),
+			null,
+			new DummyLinkGenerator(),
+			[],
+			[]
+		);
+
+		return restClient.create('foo', {}).then((response) => {
+			expect(methodCalled).toBe(true);
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
+
+	it('should execute a DELETE request when delete() is called', (done) => {
+		let methodCalled = false;
+
+		let restClient = new DummyRestClient(
+			new (class extends DummyHttpAgent {
+				delete(url, data, options) {
+					expect(methodCalled).toBe(false);
+					methodCalled = true;
+					return super.get(url, data, options);
+				}
+			}),
+			null,
+			new DummyLinkGenerator(),
+			[],
+			[]
+		);
+
+		return restClient.delete('foo', 1).then((response) => {
+			expect(methodCalled).toBe(true);
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
 
 });
