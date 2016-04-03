@@ -28,4 +28,28 @@ export default class LinkGenerator {
 	 * @return {string} The generated URL for accessing the specified resource.
 	 */
 	createLink(parentEntity, resource, id, parameters, serverConfiguration) {}
+
+	/**
+	 * Encodes the provided parameters as a query string.
+	 *
+	 * @param {Object<string, (number|string)>} parameters The query parameters
+	 *        to encode.
+	 * @param {string=} separator Separator of the key-value pairs.
+	 * @param {string=} valueSeparator Separator of keys and values.
+	 * @param {function((number|string)): string=} encoder The key and value
+	 *        encoding function.
+	 * @return {string} The encoded parameters.
+	 */
+	static encodeQuery(parameters, separator = '&', valueSeparator = '=',
+			encoder = encodeURIComponent) {
+		let pairs = [];
+		let keys = Object.keys(parameters);
+		let count = keys.length;
+		for (let i = 0; i < count; i++) {
+			let key = keys[i];
+			let value = parameters[key];
+			pairs.push(`${encoder(key)}${valueSeparator}${encoder(value)}`);
+		}
+		return pairs.join(separator);
+	}
 }
