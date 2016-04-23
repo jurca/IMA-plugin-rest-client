@@ -52,10 +52,16 @@ export default class Request {
 		 * The parameters do not contain the resource entity id, even if one
 		 * was provided.
 		 *
-		 * @type {?Object<string, (number|string)>}
+		 * @type {?Object<string, (number|string|(number|string)[])>}
 		 */
 		this.parameters = requestData.parameters &&
-				Object.freeze(Object.assign({}, requestData.parameters));
+				Object.freeze(clone(requestData.parameters));
+		for (let parameterName of Object.keys(this.parameters)) {
+			let value = this.parameters[parameterName];
+			if (value instanceof Array) {
+				Object.freeze(value);
+			}
+		}
 
 		/**
 		 * The HTTP method to use to make the request. The method is specified

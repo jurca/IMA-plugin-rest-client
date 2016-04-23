@@ -202,8 +202,8 @@ export default class AbstractRestClient extends RestClient {
 	 * @param {*} resource The REST resource to access.
 	 * @param {?(number|string|(number|string)[])} id The ID(s) identifying the
 	 *        entity or group of entities to access.
-	 * @param {Object<string, (number|string)>} parameters Additional
-	 *        parameters to use when generating the URL.
+	 * @param {Object<string, (number|string|(number|string)[])>} parameters
+	 *        Additional parameters to use when generating the URL.
 	 * @param {*} data The data to send in the request's body.
 	 * @param {{
 	 *     timeout: number=,
@@ -258,8 +258,8 @@ export default class AbstractRestClient extends RestClient {
 	 * @param {*} resource The resource to be accessed in the REST API.
 	 * @param {?(number|string|(number|string)[])} id The ID of the entity or
 	 *        entities to access.
-	 * @param {Object<string, (number|string)>} parameters Additional
-	 *        parameters to use when generating the URL.
+	 * @param {Object<string, (number|string|(number|string)[])>} parameters
+	 *        Additional parameters to use when generating the URL.
 	 * @return {string} The generated URL.
 	 */
 	_generateUrl(parentEntity, resource, id, parameters) {
@@ -281,8 +281,8 @@ export default class AbstractRestClient extends RestClient {
 	 *        parent resource from the entity. Use {@code null} if the
 	 *        specified resource is a top-level resource within the REST API.
 	 * @param {*} resource The resource to be accessed in the REST API.
-	 * @param {Object<string, (number|string)>} parameters Additional
-	 *        parameters that were used to generate the URL.
+	 * @param {Object<string, (number|string|(number|string)[])>} parameters
+	 *        Additional parameters that were used to generate the URL.
 	 * @param {string} method The HTTP method to use to send the request.
 	 * @param {string} url The URL to which the request should be made.
 	 * @param {*} data The data to send in the request's body.

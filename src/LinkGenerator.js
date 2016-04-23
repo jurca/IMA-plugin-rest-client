@@ -19,8 +19,8 @@ export default class LinkGenerator {
 	 *        entity or a group of entities to access within the specified
 	 *        resource, or {@code null} if the resource itself should be
 	 *        accessed.
-	 * @param {Object<string, (number|string)>} parameters Additional
-	 *        parameters to use to generate the access URL.
+	 * @param {Object<string, (number|string|(number|string)[])>} parameters
+	 *        Additional parameters to use to generate the access URL.
 	 * @param {?Object<string, *>} serverConfiguration Configuration of the
 	 *        REST client as provided by the server, or {@code null} if no
 	 *        server-provided configuration is being used with the current REST

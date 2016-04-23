@@ -17,9 +17,9 @@ export default class RestClient {
 	 *
 	 * @param {*} resource The resource from which the entities should be
 	 *        retrieved.
-	 * @param {Object<string, (number|string)>=} parameters The additional
-	 *        parameters to send to the server with the request to configure
-	 *        the server's response.
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *     timeout: number=,
 	 *     ttl: number=,
@@ -52,9 +52,9 @@ export default class RestClient {
 	 *        retrieved.
 	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
 	 *        entity or group of entities to retrieve.
-	 * @param {Object<string, (number|string)>=} parameters The additional
-	 *        parameters to send to the server with the request to configure
-	 *        the server's response.
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *     timeout: number=,
 	 *     ttl: number=,
