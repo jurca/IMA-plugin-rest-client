@@ -30,7 +30,9 @@ export default class LinkGenerator {
 	createLink(parentEntity, resource, id, parameters, serverConfiguration) {}
 
 	/**
-	 * Encodes the provided parameters as a query string.
+	 * Encodes the provided parameters as a
+	 * {@code application/x-www-form-urlencoded} query string. The query string
+	 * will not be prefixed by a question mark ({@code ?}).
 	 *
 	 * @param {Object<string, (number|string)>} parameters The query parameters
 	 *        to encode.
