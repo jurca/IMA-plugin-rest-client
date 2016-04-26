@@ -1,4 +1,5 @@
 
+import AbstractEntity from './AbstractEntity';
 import HttpMethod from './HttpMethod';
 import Request from './Request';
 import Response from './Response';
@@ -206,15 +207,16 @@ export default class AbstractRestClient extends RestClient {
 	 *        Additional parameters to use when generating the URL.
 	 * @param {*} data The data to send in the request's body.
 	 * @param {{
-	 *     timeout: number=,
-	 *     ttl: number=,
-	 *     repeatRequest: number=,
-	 *     headers: Object<string, string>=,
-	 *     cache: boolean=,
-	 *     withCredentials: boolean=
-	 * }} options The HTTP request option as they would be passed to the IMA
-	 *        HTTP agent.
-	 * @return {Promise<Response>} The post-processed server's response.
+	 *            timeout: number=,
+	 *            ttl: number=,
+	 *            repeatRequest: number=,
+	 *            headers: Object<string, string>=,
+	 *            cache: boolean=,
+	 *            withCredentials: boolean=
+	 *        }=} options The HTTP request option as they would be passed to
+	 *        the IMA HTTP agent.
+	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} The
+	 *         post-processed server's response.
 	 */
 	_prepareAndExecuteRequest(method, parentEntity, resource, id, parameters,
 			data, options) {
@@ -287,14 +289,14 @@ export default class AbstractRestClient extends RestClient {
 	 * @param {string} url The URL to which the request should be made.
 	 * @param {*} data The data to send in the request's body.
 	 * @param {{
-	 *     timeout: number=,
-	 *     ttl: number=,
-	 *     repeatRequest: number=,
-	 *     headers: Object<string, string>=,
-	 *     cache: boolean=,
-	 *     withCredentials: boolean=
-	 * }} rawOptions The HTTP request option as they would be passed to the IMA
-	 *        HTTP agent.
+	 *            timeout: number=,
+	 *            ttl: number=,
+	 *            repeatRequest: number=,
+	 *            headers: Object<string, string>=,
+	 *            cache: boolean=,
+	 *            withCredentials: boolean=
+	 *        }=} rawOptions The HTTP request option as they would be passed to
+	 *        the IMA HTTP agent.
 	 * @return {Request} The created request.
 	 */
 	_createRequest(parentEntity, resource, parameters, method, url, data,
@@ -327,18 +329,22 @@ export default class AbstractRestClient extends RestClient {
 	 * @private
 	 * @param {Request} request The request to pre-process, and then send to
 	 *        the server.
-	 * @return {Promise<Response>} A promise that will resolve to the
-	 *         post-processed server's response, or a post-processed response
-	 *         provided by one of the pre-processors.
+	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
+	 *         that will resolve to the post-processed server's response, or a
+	 *         post-processed response provided by one of the pre-processors,
+	 *         or an entity or array of entities or {@code null} if the
+	 *         resource class has the {@code inlineResponseBody} flag set.
 	 */
 	_executeRequest(request) {
 		let responsePromise;
 
 		for (let preProcessor of this._preProcessors) {
-			request = preProcessor.process(request);
-			if (request instanceof Response) {
-				responsePromise = Promise.resolve(request);
+			let processedRequest = preProcessor.process(request);
+			if (processedRequest instanceof Response) {
+				responsePromise = Promise.resolve(processedRequest);
 				break;
+			} else {
+				request = processedRequest;
 			}
 		}
 
@@ -351,8 +357,53 @@ export default class AbstractRestClient extends RestClient {
 				response = postProcessor.process(response);
 			}
 
+			if (request.resource.prototype instanceof AbstractEntity) {
+				response = this._convertResponseBodyToEntities(response);
+			}
+
+			if (request.resource.inlineResponseBody) {
+				return response.body;
+			}
+
 			return response;
 		});
+	}
+
+	/**
+	 * Converts the provided response to a response with the body set an
+	 * entity, an array of entities, or {@code null}. The entities will be
+	 * instances of the REST API resource-identifying class (a class extending
+	 * the {@linkcode AbstractEntity} class).
+	 *
+	 * The body of the resulting response object will be {@code null} if the
+	 * provided response contains no useful data in its body.
+	 *
+	 * @private
+	 * @param {Response} response The REST API response that should have its
+	 *        body replaced with entity(ies).
+	 * @return {Response} Response object with its body set to an entity, an
+	 *         array of entities, or {@code null} if the original body did not
+	 *         contain any usable data.
+	 */
+	_convertResponseBodyToEntities(response) {
+		let body = response.body;
+		let resource = response.request.resource;
+		let parentEntity = response.request.parentEntity;
+		if (body instanceof Array) {
+			body = body.map(entityData => new resource(
+				this,
+				entityData,
+				parentEntity
+			));
+		} else if (body) {
+			body = new resource(this, body, parentEntity);
+		} else {
+			body = null;
+		}
+
+		return new Response(Object.assign({}, response, {
+			body
+		}));
 	}
 
 	/**

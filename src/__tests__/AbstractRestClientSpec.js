@@ -6,6 +6,7 @@ import Request from '../Request';
 import RequestPreProcessor from '../RequestPreProcessor';
 import Response from '../Response';
 import ResponsePostProcessor from '../ResponsePostProcessor';
+import AbstractEntity from '../AbstractEntity';
 
 describe('AbstractRestClient', () => {
 
@@ -13,6 +14,10 @@ describe('AbstractRestClient', () => {
 
 	class DummyLinkGenerator extends LinkGenerator {
 		createLink(parentEntity, resource, id, parameters, serverConfig) {
+			if (resource.prototype instanceof AbstractEntity) {
+				resource = resource.resourceName;
+			}
+
 			return `http://server.api/${resource}`;
 		}
 	}
@@ -648,6 +653,195 @@ describe('AbstractRestClient', () => {
 
 		return restClient.delete('foo', 1).then((response) => {
 			expect(methodCalled).toBe(true);
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
+
+	it('should allow classes extending the AbstractEntity class to be used ' +
+			'as resource', (done) => {
+		let restClient = new DummyRestClient(
+			new (class extends DummyHttpAgent {
+				get(url, data, options) {
+					expect(url).toBe('http://server.api/this-is-the-resource');
+
+					return Promise.resolve({
+						status: 200,
+						body: [{
+							id: 1,
+							stuff: 'yes'
+						}, {
+							id: 2,
+							stuff: 'no'
+						}],
+						params: {
+							method: 'GET',
+							url,
+							transformedUrl: url,
+							data,
+							headers: options.headers
+						},
+						headers: {},
+						cached: false
+					});
+				}
+			}),
+			null,
+			new DummyLinkGenerator(),
+			[],
+			[]
+		);
+
+		class Entity extends AbstractEntity {
+			static get resourceName() {
+				return 'this-is-the-resource';
+			}
+
+			static get idFieldName() {
+				return 'id';
+			}
+		}
+
+		return restClient.list(Entity).then((response) => {
+			expect(response.request.resource).toBe(Entity);
+			expect(response.body instanceof Array).toBeTruthy();
+			expect(response.body).toEqual([
+				new Entity(restClient, {
+					id: 1,
+					stuff: 'yes'
+				}),
+				new Entity(restClient, {
+					id: 2,
+					stuff: 'no'
+				})
+			]);
+
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
+
+	it('should handle single-entity response and empty response when using ' +
+			'a class as resource', (done) => {
+		let responseBody = {
+			id: 1,
+			stuff: 'yes'
+		};
+
+		class Entity extends AbstractEntity {
+			static get resourceName() {
+				return 'this-is-the-resource';
+			}
+
+			static get idFieldName() {
+				return 'id';
+			}
+		}
+
+		let restClient = new DummyRestClient(
+			new (class extends DummyHttpAgent {
+				get(url, data, options) {
+					return Promise.resolve({
+						status: 200,
+						body: responseBody,
+						params: {
+							method: 'GET',
+							url,
+							transformedUrl: url,
+							data,
+							headers: options.headers
+						},
+						headers: {},
+						cached: false
+					});
+				}
+			}),
+			null,
+			new DummyLinkGenerator(),
+			[],
+			[]
+		);
+		
+		let parent = new Entity(restClient, {
+			id: 'nope'
+		});
+
+		return restClient.list(Entity, {}, {}, parent).then((response) => {
+			expect(response.request.resource).toBe(Entity);
+			expect(response.body instanceof Entity).toBeTruthy();
+			expect(response.body).toEqual(new Entity(restClient, {
+				id: 1,
+				stuff: 'yes'
+			}));
+			expect(response.body.parentEntity).toBe(parent);
+
+			responseBody = '';
+
+			return restClient.list(Entity);
+		}).then((response) => {
+			expect(response.body).toBeNull();
+
+			done();
+		}).catch((error) => {
+			fail(error.stack);
+			done();
+		});
+	});
+
+	it('should inline the response body if the inlineResponseBody flag is ' +
+			'set', (done) => {
+		class Entity extends AbstractEntity {
+			static get resourceName() {
+				return 'this-is-the-resource';
+			}
+
+			static get idFieldName() {
+				return 'id';
+			}
+
+			static get inlineResponseBody() {
+				return true;
+			}
+		}
+
+		let restClient = new DummyRestClient(
+			new (class extends DummyHttpAgent {
+				get(url, data, options) {
+					return Promise.resolve({
+						status: 200,
+						body: {
+							id: 1,
+							stuff: 'yes'
+						},
+						params: {
+							method: 'GET',
+							url,
+							transformedUrl: url,
+							data,
+							headers: options.headers
+						},
+						headers: {},
+						cached: false
+					});
+				}
+			}),
+			null,
+			new DummyLinkGenerator(),
+			[],
+			[]
+		);
+
+		return restClient.list(Entity).then((response) => {
+			expect(response instanceof Entity).toBeTruthy();
+			expect(response).toEqual(new Entity(restClient, {
+				id: 1,
+				stuff: 'yes'
+			}));
+
 			done();
 		}).catch((error) => {
 			fail(error.stack);

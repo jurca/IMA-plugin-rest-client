@@ -21,20 +21,23 @@ export default class RestClient {
 	 *        The additional parameters to send to the server with the request
 	 *        to configure the server's response.
 	 * @param {{
-	 *     timeout: number=,
-	 *     ttl: number=,
-	 *     repeatRequest: number=,
-	 *     headers: Object<string, string>=,
-	 *     cache: boolean=,
-	 *     withCredentials: boolean=
-	 * }=} options Request options. See the documentation of the HTTP agent for
-	 *     more details.
+	 *            timeout: number=,
+	 *            ttl: number=,
+	 *            repeatRequest: number=,
+	 *            headers: Object<string, string>=,
+	 *            cache: boolean=,
+	 *            withCredentials: boolean=
+	 *        }=} options Request options. See the documentation of the HTTP
+	 *        agent for more details.
 	 * @param {*} parentEntity The parent entity within which the specified
 	 *        resource will be manipulated. It may be needed to determine the
 	 *        parent resource from the entity. Use {@code null} if the
 	 *        specified resource is a top-level resource within the REST API.
-	 * @return {Promise<Response>} A promise that will resolve to the server's
-	 *         response.
+	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
+	 *         that will resolve to the server's response, or the entity,
+	 *         entities or {@code null} constructed from the response body if
+	 *         the resource is a class extending the {@code AbstractEntity}
+	 *         class and has the {@code inlineResponseBody} flag set.
 	 */
 	list(resource, parameters = {}, options = {}, parentEntity = null) {}
 
@@ -56,20 +59,23 @@ export default class RestClient {
 	 *        The additional parameters to send to the server with the request
 	 *        to configure the server's response.
 	 * @param {{
-	 *     timeout: number=,
-	 *     ttl: number=,
-	 *     repeatRequest: number=,
-	 *     headers: Object<string, string>=,
-	 *     cache: boolean=,
-	 *     withCredentials: boolean=
-	 * }=} options Request options. See the documentation of the HTTP agent for
-	 *     more details.
+	 *            timeout: number=,
+	 *            ttl: number=,
+	 *            repeatRequest: number=,
+	 *            headers: Object<string, string>=,
+	 *            cache: boolean=,
+	 *            withCredentials: boolean=
+	 *        }=} options Request options. See the documentation of the HTTP
+	 *        agent for more details.
 	 * @param {*} parentEntity The parent entity within which the specified
 	 *        resource will be manipulated. It may be needed to determine the
 	 *        parent resource from the entity. Use {@code null} if the
 	 *        specified resource is a top-level resource within the REST API.
-	 * @return {Promise<Response>} A promise that will resolve to the server's
-	 *         response.
+	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
+	 *         that will resolve to the server's response, or the entity,
+	 *         entities or {@code null} constructed from the response body if
+	 *         the resource is a class extending the {@code AbstractEntity}
+	 *         class and has the {@code inlineResponseBody} flag set.
 	 */
 	get(resource, id, parameters = {}, options = {}, parentEntity = null) {}
 
@@ -89,22 +95,25 @@ export default class RestClient {
 	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
 	 *        entity or group of entities to modify.
 	 * @param {*} data The data representing the modifications to make to the
-	 *        entity..
+	 *        entity.
 	 * @param {{
-	 *     timeout: number=,
-	 *     ttl: number=,
-	 *     repeatRequest: number=,
-	 *     headers: Object<string, string>=,
-	 *     cache: boolean=,
-	 *     withCredentials: boolean=
-	 * }=} options Request options. See the documentation of the HTTP agent for
-	 *     more details.
+	 *            timeout: number=,
+	 *            ttl: number=,
+	 *            repeatRequest: number=,
+	 *            headers: Object<string, string>=,
+	 *            cache: boolean=,
+	 *            withCredentials: boolean=
+	 *        }=} options Request options. See the documentation of the HTTP
+	 *        agent for more details.
 	 * @param {*} parentEntity The parent entity within which the specified
 	 *        resource will be manipulated. It may be needed to determine the
 	 *        parent resource from the entity. Use {@code null} if the
 	 *        specified resource is a top-level resource within the REST API.
-	 * @return {Promise<Response>} A promise that will resolve to the server's
-	 *         response.
+	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
+	 *         that will resolve to the server's response, or the entity,
+	 *         entities or {@code null} constructed from the response body if
+	 *         the resource is a class extending the {@code AbstractEntity}
+	 *         class and has the {@code inlineResponseBody} flag set.
 	 */
 	patch(resource, id, data, options = {}, parentEntity = null) {}
 
@@ -120,20 +129,23 @@ export default class RestClient {
 	 *        entity or group of entities to replace.
 	 * @param {*} data The data representing the entity.
 	 * @param {{
-	 *     timeout: number=,
-	 *     ttl: number=,
-	 *     repeatRequest: number=,
-	 *     headers: Object<string, string>=,
-	 *     cache: boolean=,
-	 *     withCredentials: boolean=
-	 * }=} options Request options. See the documentation of the HTTP agent for
-	 *     more details.
+	 *            timeout: number=,
+	 *            ttl: number=,
+	 *            repeatRequest: number=,
+	 *            headers: Object<string, string>=,
+	 *            cache: boolean=,
+	 *            withCredentials: boolean=
+	 *        }=} options Request options. See the documentation of the HTTP
+	 *        agent for more details.
 	 * @param {*} parentEntity The parent entity within which the specified
 	 *        resource will be manipulated. It may be needed to determine the
 	 *        parent resource from the entity. Use {@code null} if the
 	 *        specified resource is a top-level resource within the REST API.
-	 * @return {Promise<Response>} A promise that will resolve to the server's
-	 *         response.
+	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
+	 *         that will resolve to the server's response, or the entity,
+	 *         entities or {@code null} constructed from the response body if
+	 *         the resource is a class extending the {@code AbstractEntity}
+	 *         class and has the {@code inlineResponseBody} flag set.
 	 */
 	replace(resource, id, data, options = {}, parentEntity = null) {}
 
@@ -147,20 +159,23 @@ export default class RestClient {
 	 * @param {*} resource The resource in which the entity should be created.
 	 * @param {*} data The data representing the entity.
 	 * @param {{
-	 *     timeout: number=,
-	 *     ttl: number=,
-	 *     repeatRequest: number=,
-	 *     headers: Object<string, string>=,
-	 *     cache: boolean=,
-	 *     withCredentials: boolean=
-	 * }=} options Request options. See the documentation of the HTTP agent for
-	 *     more details.
+	 *            timeout: number=,
+	 *            ttl: number=,
+	 *            repeatRequest: number=,
+	 *            headers: Object<string, string>=,
+	 *            cache: boolean=,
+	 *            withCredentials: boolean=
+	 *        }=} options Request options. See the documentation of the HTTP
+	 *        agent for more details.
 	 * @param {*} parentEntity The parent entity within which the specified
 	 *        resource will be manipulated. It may be needed to determine the
 	 *        parent resource from the entity. Use {@code null} if the
 	 *        specified resource is a top-level resource within the REST API.
-	 * @return {Promise<Response>} A promise that will resolve to the server's
-	 *         response.
+	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
+	 *         that will resolve to the server's response, or the entity,
+	 *         entities or {@code null} constructed from the response body if
+	 *         the resource is a class extending the {@code AbstractEntity}
+	 *         class and has the {@code inlineResponseBody} flag set.
 	 */
 	create(resource, data, options = {}, parentEntity = null) {}
 
@@ -176,20 +191,23 @@ export default class RestClient {
 	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
 	 *        entity or group of entities to delete.
 	 * @param {{
-	 *     timeout: number=,
-	 *     ttl: number=,
-	 *     repeatRequest: number=,
-	 *     headers: Object<string, string>=,
-	 *     cache: boolean=,
-	 *     withCredentials: boolean=
-	 * }=} options Request options. See the documentation of the HTTP agent for
-	 *     more details.
+	 *            timeout: number=,
+	 *            ttl: number=,
+	 *            repeatRequest: number=,
+	 *            headers: Object<string, string>=,
+	 *            cache: boolean=,
+	 *            withCredentials: boolean=
+	 *        }=} options Request options. See the documentation of the HTTP
+	 *        agent for more details.
 	 * @param {*} parentEntity The parent entity within which the specified
 	 *        resource will be manipulated. It may be needed to determine the
 	 *        parent resource from the entity. Use {@code null} if the
 	 *        specified resource is a top-level resource within the REST API.
-	 * @return {Promise<Response>} A promise that will resolve to the server's
-	 *         response.
+	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
+	 *         that will resolve to the server's response, or the entity,
+	 *         entities or {@code null} constructed from the response body if
+	 *         the resource is a class extending the {@code AbstractEntity}
+	 *         class and has the {@code inlineResponseBody} flag set.
 	 */
 	delete(resource, id, options = {}, parentEntity = null) {}
 }

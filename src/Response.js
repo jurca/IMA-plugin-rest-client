@@ -1,5 +1,6 @@
 
 import clone from 'clone';
+import AbstractEntity from './AbstractEntity';
 import Request from './Request';
 
 /**
@@ -34,16 +35,32 @@ export default class Response {
 		 */
 		this.headers = Object.freeze(Object.assign({}, responseData.headers));
 
+		let bodyData;
+		if (responseData.body instanceof Array) {
+			bodyData = responseData.body.map((element) => {
+				if (element instanceof AbstractEntity) {
+					return element;
+				} else {
+					return Object.freeze(clone(element));
+				}
+			});
+			Object.freeze(bodyData);
+		} else if (responseData.body instanceof AbstractEntity) {
+			bodyData = responseData.body;
+		} else {
+			bodyData = clone(responseData.body);
+			if (bodyData && (typeof bodyData === 'object')) {
+				Object.freeze(bodyData);
+			}
+		}
+
 		/**
 		 * The response of the body, already parsed according to the value of
 		 * the response's {@code Content-Type} header.
 		 *
 		 * @type {*}
 		 */
-		this.body = clone(responseData.body);
-		if (this.body && (typeof this.body === 'object')) {
-			Object.freeze(this.body);
-		}
+		this.body = bodyData;
 
 		/**
 		 * The flag signalling whether this request was handled by the HTTP
