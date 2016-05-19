@@ -24,8 +24,9 @@ export default class AbstractEntity {
 	 * @param {Object<string, *>} data Entity data, which will be directly
 	 *        assigned to the entity's fields.
 	 * @param {?AbstractEntity=} parentEntity The entity within which the
-	 *        resource containing this entity is located. Can be set to null if
-	 *        this entity belongs to a top-level resource without a parent.
+	 *        resource containing this entity is located. Can be set to
+	 *        {@code null} if this entity belongs to a top-level resource
+	 *        without a parent.
 	 */
 	constructor(restClient, data, parentEntity = null) {
 		if (!(restClient instanceof RestClient)) {
