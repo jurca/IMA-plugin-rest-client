@@ -1,7 +1,6 @@
 require('babel-core/register.js')({
 	'plugins': [
-		'babel-plugin-transform-es2015-modules-commonjs',
-		'babel-plugin-transform-es2015-parameters'
+		'babel-plugin-transform-es2015-modules-commonjs'
 	].map(require.resolve) // fixes the issue with babel loader & linked modules
 });
 
