@@ -56,10 +56,12 @@ export default class Request {
 		 */
 		this.parameters = requestData.parameters &&
 				Object.freeze(clone(requestData.parameters));
-		for (let parameterName of Object.keys(this.parameters)) {
-			let value = this.parameters[parameterName];
-			if (value instanceof Array) {
-				Object.freeze(value);
+		if (this.parameters) {
+			for (let parameterName of Object.keys(this.parameters)) {
+				let value = this.parameters[parameterName];
+				if (value instanceof Array) {
+					Object.freeze(value);
+				}
 			}
 		}
 
