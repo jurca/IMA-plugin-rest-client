@@ -15,7 +15,7 @@ gulp.task('build', function() {
 		gulp.src('./src/**/!(*Spec).js')
 		.pipe(babel({
 			moduleIds: true,
-			plugins: ['transform-es2015-modules-commonjs']
+			presets: ['es2015']
 		}))
 		.pipe(gulp.dest('./dist'))
 	);
