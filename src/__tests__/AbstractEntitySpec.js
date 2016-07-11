@@ -235,7 +235,7 @@ describe('AbstractEntity', () => {
 		});
 	});
 
-	fdescribe('serialization', () => {
+	describe('serialization', () => {
 		let serializeCalled = false;
 
 		class TransformingEntity extends Entity {
