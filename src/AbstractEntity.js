@@ -34,7 +34,7 @@ export default class AbstractEntity {
 					`instance, ${restClient} provided`);
 		}
 
-		Object.assign(this, data);
+		Object.assign(this, this.deserialize(data));
 
 		/**
 		 * The REST API client to use to communicate with the REST API.
@@ -168,7 +168,10 @@ export default class AbstractEntity {
 	 *
 	 * @param {RestClient} restClient The REST API client using which the
 	 *        request should be made.
-	 * @param {Object<string, *>} data The entity data.
+	 * @param {Object<string, *>} data The entity data. The data should be
+	 *        compatible with this entity's structure so that they can be
+	 *        directly assigned to the entity, and will be automatically
+	 *        serialized before submitting to the server.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -184,7 +187,11 @@ export default class AbstractEntity {
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
 	static create(restClient, data, options = {}) {
-		let instance = new this(restClient, data);
+		// Prevent deserialization of already deserialized entity data, we'll
+		// assign the data directly.
+		let instance = new this(restClient, {});
+		Object.assign(instance, data);
+		
 		return instance.create(options);
 	}
 
@@ -287,7 +294,10 @@ export default class AbstractEntity {
 	 * entity instance.
 	 *
 	 * @param {Object<string, *>} data The data with which this entity should
-	 *        be patched.
+	 *        be patched. The data should be compatible with this entity's
+	 *        structure so that they can be directly assigned to the entity,
+	 *        and will be automatically serialized before submitting to the
+	 *        server.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -306,7 +316,13 @@ export default class AbstractEntity {
 		let resource = this.constructor;
 		let id = this[resource.idFieldName];
 		let client = this[PRIVATE.restClient];
-		return client.patch(resource, id, data, options).then((response) => {
+		let serializedData = this.serialize(data);
+		return client.patch(
+			resource,
+			id,
+			serializedData,
+			options
+		).then((response) => {
 			Object.assign(this, data);
 			return response;
 		});
@@ -333,7 +349,7 @@ export default class AbstractEntity {
 	replace(options = {}) {
 		let id = this[this.constructor.idFieldName];
 		let client = this[PRIVATE.restClient];
-		return client.replace(this.constructor, id, this, options);
+		return client.replace(this.constructor, id, this.serialize(), options);
 	}
 
 	/**
@@ -355,7 +371,7 @@ export default class AbstractEntity {
 	 */
 	create(options = {}) {
 		let client = this[PRIVATE.restClient];
-		return client.create(this.constructor, this, options);
+		return client.create(this.constructor, this.serialize(), options);
 	}
 
 	/**
@@ -378,5 +394,35 @@ export default class AbstractEntity {
 	delete(options = {}) {
 		let id = this[this.constructor.idFieldName];
 		return this.constructor.delete(this[PRIVATE.restClient], id, options);
+	}
+
+	/**
+	 * Serializes this entity into a JSON-compatible plain JavaScript object
+	 * that has a structure that is compatible with the entity's REST API
+	 * resource.
+	 *
+	 * Note that this method may not receive a representation of the entity's
+	 * complete state if invoked by the {@linkcode patch()} method.
+	 *
+	 * @return {Object<string, *>} Data object representing this entity in a
+	 *         way that is compatible with the REST API.
+	 */
+	serialize(data = this) {
+		return Object.assign({}, data);
+	}
+
+	/**
+	 * Pre-processes the provided data obtained from the REST API into a form
+	 * that can be assigned to this entity.
+	 *
+	 * This method can be used to format data, rename fields, generated
+	 * computed fields, etc.
+	 *
+	 * @param {Object<string, *>} data The data retrieved from the REST API.
+	 * @return {Object<string, *>} The data ready to be assigned to this
+	 *         entity.
+	 */
+	deserialize(data) {
+		return data;
 	}
 }

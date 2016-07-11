@@ -21,6 +21,7 @@ describe('AbstractEntity', () => {
 	let restResult;
 	let calledClientMethods;
 	let restClient;
+	let restClientCallbacks;
 	
 	class RestClient extends AbstractRestClient {
 		list(resource, parameters = {}, options = {}, parentEntity = null) {
@@ -35,16 +36,25 @@ describe('AbstractEntity', () => {
 
 		patch(resource, id, data, options = {}, parentEntity = null) {
 			calledClientMethods.patch = true;
+			if (restClientCallbacks.patch) {
+				restClientCallbacks.patch(data);
+			}
 			return Promise.resolve(restResult);
 		}
 
 		replace(resource, id, data, options = {}, parentEntity = null) {
 			calledClientMethods.replace = true;
+			if (restClientCallbacks.replace) {
+				restClientCallbacks.replace(data);
+			}
 			return Promise.resolve(restResult);
 		}
 
 		create(resource, data, options = {}, parentEntity = null) {
 			calledClientMethods.create = true;
+			if (restClientCallbacks.create) {
+				restClientCallbacks.create(data);
+			}
 			return Promise.resolve(restResult);
 		}
 
@@ -63,6 +73,11 @@ describe('AbstractEntity', () => {
 			replace: false,
 			create: false,
 			delete: false
+		};
+		restClientCallbacks = {
+			create: null,
+			patch: null,
+			replace: null
 		};
 		restClient = new RestClient(null, null, null, [], []);
 	});
@@ -218,6 +233,159 @@ describe('AbstractEntity', () => {
 			fail(error.stack);
 			done();
 		});
+	});
+
+	fdescribe('serialization', () => {
+		let serializeCalled = false;
+
+		class TransformingEntity extends Entity {
+			serialize(data = this) {
+				serializeCalled = true;
+				let serialized = super.serialize(data);
+				serialized.serialized = true;
+				delete serialized.dynamic;
+				delete serialized.onlyDynamic;
+				return serialized;
+			}
+
+			deserialize(data) {
+				let clone = Object.assign({}, data);
+				clone.dynamic = true;
+				delete clone.serialized;
+				return clone;
+			}
+		}
+
+		beforeEach(() => {
+			serializeCalled = false;
+		});
+
+		it('should deserialize entity data upon creation', () => {
+			let entity = new TransformingEntity(restClient, {
+				test: 'tested',
+				serialized: true
+			});
+			expect(Object.assign({}, entity)).toEqual({
+				test: 'tested',
+				dynamic: true
+			});
+		});
+		
+		it('should create entities from deserialized data when using static ' +
+				'create()', (done) => {
+			let createCalled = false;
+			restClientCallbacks.create = (data) => {
+				createCalled = true;
+				expect(data).toEqual({
+					test: 'testing',
+					serialized: true
+				});
+			};
+			restResult = new TransformingEntity(restClient, {
+				test: 'testing',
+				serialized: true
+			});
+			TransformingEntity.create(restClient, {
+				test: 'testing',
+				dynamic: true
+			}).then((entity) => {
+				expect(serializeCalled).toBeTruthy();
+				expect(Object.assign({}, entity)).toEqual({
+					test: 'testing',
+					dynamic: true
+				});
+				done();
+			});
+		});
+
+		it('should use deserialized entity data in the patch method',
+				(done) => {
+			let entity = new TransformingEntity(restClient, {
+				test: 'testing',
+				testing: 'test',
+				serialized: true
+			});
+			let patchCalled = false;
+			restClientCallbacks.patch = (data) => {
+				patchCalled = true;
+				expect(data).toEqual({
+					test: 'tested',
+					test2: 1,
+					serialized: true
+				});
+			};
+			entity.patch({
+				test: 'tested',
+				test2: 1,
+				onlyDynamic: true
+			}).then(() => {
+				expect(patchCalled).toBeTruthy();
+				expect(Object.assign({}, entity)).toEqual({
+					test: 'tested',
+					testing: 'test',
+					dynamic: true,
+					onlyDynamic: true,
+					test2: 1
+				});
+				done();
+			});
+		});
+
+		it('should use deserialized entity data in the replace method',
+				(done) => {
+			let entity = new TransformingEntity(restClient, {
+				test: 'testing',
+				testing: 'test',
+				serialized: true
+			});
+			let replaceCalled = false;
+			restClientCallbacks.replace = (data) => {
+				replaceCalled = true;
+				expect(data).toEqual({
+					test: 'tested',
+					testing: 'test',
+					serialized: true
+				});
+			};
+			entity.test = 'tested';
+			entity.replace().then(() => {
+				expect(replaceCalled).toBeTruthy();
+				expect(Object.assign({}, entity)).toEqual({
+					test: 'tested',
+					testing: 'test',
+					dynamic: true
+				});
+				done();
+			});
+		});
+
+		it('should use deserialized entity data in the dynamic create method',
+				(done) => {
+			let entity = new TransformingEntity(restClient, {
+				test: 'testing',
+				testing: 'test',
+				serialized: true
+			});
+			let createCalled = false;
+			restClientCallbacks.create = (data) => {
+				createCalled = true;
+				expect(data).toEqual({
+					test: 'testing',
+					testing: 'test',
+					serialized: true
+				});
+			};
+			entity.create().then(() => {
+				expect(createCalled).toBeTruthy();
+				expect(Object.assign({}, entity)).toEqual({
+					test: 'testing',
+					testing: 'test',
+					dynamic: true
+				});
+				done();
+			});
+		});
+
 	});
 	
 });
