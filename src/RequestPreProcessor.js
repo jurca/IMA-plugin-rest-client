@@ -19,11 +19,12 @@ export default class RequestPreProcessor {
 	 *
 	 * @param {Request} request The REST API request to pre-process before
 	 *        passing it to the HTTP agent.
-	 * @return {(Request|Response)} The request, as it should be passed to the
-	 *         next request pre-processor, or the HTTP agent itself if there
-	 *         are no remaining pre-processors left; or a response to return to
-	 *         the caller of the REST API client's methods if there is no need
-	 *         to make an actual HTTP request to the server.
+	 * @return {(Request|Response|Promise<Response>)} The request, as it should
+	 *         be passed to the next request pre-processor, or the HTTP agent
+	 *         itself if there are no remaining pre-processors left; or a
+	 *         response (or promise that will resolve to a response) to return
+	 *         to the caller of the REST API client's methods if there is no
+	 *         need to make an actual HTTP request to the server.
 	 */
 	process(request) {}
 }

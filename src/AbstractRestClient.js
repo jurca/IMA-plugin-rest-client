@@ -340,11 +340,11 @@ export default class AbstractRestClient extends RestClient {
 
 		for (let preProcessor of this._preProcessors) {
 			let processedRequest = preProcessor.process(request);
-			if (processedRequest instanceof Response) {
+			if (processedRequest instanceof Request) {
+				request = processedRequest;
+			} else {
 				responsePromise = Promise.resolve(processedRequest);
 				break;
-			} else {
-				request = processedRequest;
 			}
 		}
 
