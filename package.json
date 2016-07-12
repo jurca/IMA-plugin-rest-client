@@ -5,6 +5,7 @@
   "main": "dist/AbstractRestClient.js",
   "scripts": {
     "prepublish": "npm run build && npm run test",
+    "build": "node node_modules/gulp/bin/gulp.js build",
     "test": "node node_modules/gulp/bin/gulp.js test"
   },
   "repository": {
