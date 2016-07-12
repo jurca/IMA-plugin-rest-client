@@ -1,9 +1,10 @@
 {
   "name": "ima-plugin-rest-client",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Generic REST API client plugin for the IMA application framework.",
   "main": "dist/AbstractRestClient.js",
   "scripts": {
+    "prepublish": "npm run build && npm run test",
     "test": "node node_modules/gulp/bin/gulp.js test"
   },
   "repository": {
