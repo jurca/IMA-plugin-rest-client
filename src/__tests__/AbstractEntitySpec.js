@@ -103,7 +103,7 @@ describe('AbstractEntity', () => {
 	it('should keep reference to its parent entity', () => {
 		expect((new Entity(restClient, {}, new Entity(restClient, {
 			id: 'yup'
-		}))).parentEntity).toEqual(new Entity(restClient, {
+		}))).$parentEntity).toEqual(new Entity(restClient, {
 			id: 'yup'
 		}));
 	});
@@ -239,16 +239,16 @@ describe('AbstractEntity', () => {
 		let serializeCalled = false;
 
 		class TransformingEntity extends Entity {
-			serialize(data = this) {
+			$serialize(data = this) {
 				serializeCalled = true;
-				let serialized = super.serialize(data);
+				let serialized = super.$serialize(data);
 				serialized.serialized = true;
 				delete serialized.dynamic;
 				delete serialized.onlyDynamic;
 				return serialized;
 			}
 
-			deserialize(data) {
+			$deserialize(data) {
 				let clone = Object.assign({}, data);
 				clone.dynamic = true;
 				delete clone.serialized;

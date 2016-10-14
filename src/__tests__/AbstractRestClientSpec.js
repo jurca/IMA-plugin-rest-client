@@ -842,7 +842,7 @@ describe('AbstractRestClient', () => {
 				id: 1,
 				stuff: 'yes'
 			}));
-			expect(response.body.parentEntity).toBe(parent);
+			expect(response.body.$parentEntity).toBe(parent);
 
 			responseBody = '';
 
