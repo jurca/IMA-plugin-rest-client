@@ -1,4 +1,5 @@
 
+import AbstractDataFieldMapper from './AbstractDataFieldMapper';
 import RestClient from './RestClient';
 
 /**
@@ -34,8 +35,6 @@ export default class AbstractEntity {
 					`instance, ${restClient} provided`);
 		}
 
-		Object.assign(this, this.deserialize(data));
-
 		/**
 		 * The REST API client to use to communicate with the REST API.
 		 *
@@ -51,6 +50,11 @@ export default class AbstractEntity {
 		 * @type {?AbstractEntity}
 		 */
 		this[PRIVATE.parentEntity] = parentEntity;
+
+		let entityData = this.$deserialize(data);
+		Object.assign(this, entityData);
+
+		this.$validatePropTypes();
 	}
 
 	/**
@@ -95,6 +99,72 @@ export default class AbstractEntity {
 	}
 
 	/**
+	 * Returns the constrains that should be applied on the properties on the
+	 * data-holding properties of this entity.
+	 *
+	 * The keys of the returned object are the names of the data-holding
+	 * properties of this entity that should be validated, the values represent
+	 * the validation constraints (these are implementation-specific).
+	 *
+	 * The constraints will be evaluated after setting the properties on this
+	 * entity using the entity's constructor of standard manipulation methods.
+	 *
+	 * Note that this class does not provides no implementation of actual
+	 * validation of these constraints - this should be provided by a plugin
+	 * extending this one.
+	 *
+	 * @return {Object<string, *>} The validation constrains that should be
+	 *         applied to this entity's properties.
+	 */
+	static get propTypes() {
+		return {};
+	}
+
+	/**
+	 * Returns the description of automatic mapping of the raw data exchanged
+	 * between the REST API and the REST API client, and the properties of this
+	 * entity.
+	 *
+	 * The keys of the returned object are the names of the properties of this
+	 * entity. The value associated with key is one of the following:
+	 *
+	 * - The name of the property in the raw data. This is useful when the
+	 *   property only needs to be renamed.
+	 *
+	 * - A property name and value mapping object, providing the name of the
+	 *   property in the raw data (for renaming), a callback for deserializing
+	 *   the value from raw data and a callback for serializing the entity's
+	 *   property value to raw data. The {@code dataFieldName} property may
+	 *   return {@code null} if the property does not need to be renamed.
+	 *
+	 * @return {Object<string, (
+	 *           string|
+	 *           function(new: AbstractDataFieldMapper)|
+	 *           {
+	 *             dataFieldName: ?string,
+	 *             deserialize: function(*): *,
+	 *             serialize: function(*): *
+	 *           }
+	 *         )>} The description of how the raw data properties should be
+	 *         mapped to the entity properties and vice versa.
+	 */
+	static get dataFieldMapping() {
+		return {};
+	}
+
+	/**
+	 * Returns the REST API client that was used to initialize this entity. The
+	 * returned REST API client will also be used in all the dynamic methods of
+	 * this entity.
+	 *
+	 * @return {RestClient} The REST API client that was used to initialize
+	 *         this entity.
+	 */
+	get $restClient() {
+		return this[PRIVATE.restClient];
+	}
+
+	/**
 	 * Returns the direct parent entity of this entity. The parent entity
 	 * contains the REST resource from which this entity originates. The getter
 	 * returns {@code null} if this entity's resource is a top-level resource
@@ -102,7 +172,7 @@ export default class AbstractEntity {
 	 *
 	 * @return {?AbstractEntity} The direct parent entity of this entity.
 	 */
-	get parentEntity() {
+	get $parentEntity() {
 		return this[PRIVATE.parentEntity];
 	}
 
@@ -124,13 +194,16 @@ export default class AbstractEntity {
 	 *            withCredentials: boolean=
 	 *        }=} options Request options. See the documentation of the HTTP
 	 *        agent for more details.
+	 * @param {?AbstractEntity=} parentEntity The parent entity containing the
+	 *        resource from which the entities should be listed.
 	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
 	 *         that will resolve to the server's response, or the entity,
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	static list(restClient, parameters = {}, options = {}) {
-		return restClient.list(this, parameters, options);
+	static list(restClient, parameters = {}, options = {},
+			parentEntity = null) {
+		return restClient.list(this, parameters, options, parentEntity);
 	}
 
 	/**
@@ -153,13 +226,16 @@ export default class AbstractEntity {
 	 *            withCredentials: boolean=
 	 *        }=} options Request options. See the documentation of the HTTP
 	 *        agent for more details.
+	 * @param {?AbstractEntity=} parentEntity The parent entity containing the
+	 *        resource from which the entity should be retrieved.
 	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
 	 *         that will resolve to the server's response, or the entity,
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	static get(restClient, id, parameters = {}, options = {}) {
-		return restClient.get(this, id, parameters, options);
+	static get(restClient, id, parameters = {}, options = {},
+			parentEntity = null) {
+		return restClient.get(this, id, parameters, options, parentEntity);
 	}
 
 	/**
@@ -181,18 +257,26 @@ export default class AbstractEntity {
 	 *            withCredentials: boolean=
 	 *        }=} options Request options. See the documentation of the HTTP
 	 *        agent for more details.
+	 * @param {?AbstractEntity=} parentEntity The parent entity containing the
+	 *        nested resource within which the new entity should be created.
 	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
 	 *         that will resolve to the server's response, or the entity,
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	static create(restClient, data, options = {}) {
-		// Prevent deserialization of already deserialized entity data, we'll
-		// assign the data directly.
-		let instance = new this(restClient, {});
-		Object.assign(instance, data);
-		
-		return instance.create(options);
+	static create(restClient, data, options = {}, parentEntity = null) {
+		// We create an entity-like object so that we can serialize the data
+		// and properly create a new entity instance later in the REST API
+		// client.
+		let fakeEntity = Object.create(this.prototype);
+		fakeEntity.constructor = this;
+		fakeEntity[PRIVATE.restClient] = restClient;
+		fakeEntity[PRIVATE.parentEntity] = parentEntity;
+		Object.assign(fakeEntity, data);
+
+		let serializedData = fakeEntity.$serialize();
+
+		return restClient.create(this, serializedData, options, parentEntity);
 	}
 
 	/**
@@ -212,13 +296,15 @@ export default class AbstractEntity {
 	 *            withCredentials: boolean=
 	 *        }=} options Request options. See the documentation of the HTTP
 	 *        agent for more details.
+	 * @param {?AbstractEntity=} parentEntity The parent entity containing the
+	 *        resource from which the entity should be deleted.
 	 * @return {Promise<?(Response|AbstractEntity|AbstractEntity[])>} A promise
 	 *         that will resolve to the server's response, or the entity,
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	static delete(restClient, id, options = {}) {
-		return restClient.delete(this, id, options);
+	static delete(restClient, id, options = {}, parentEntity = null) {
+		return restClient.delete(this, id, options, parentEntity);
 	}
 
 	/**
@@ -228,7 +314,8 @@ export default class AbstractEntity {
 	 * @param {function(
 	 *            new: AbstractEntity,
 	 *            RestClient,
-	 *            Object<string, *>
+	 *            Object<string, *>,
+	 *            ?AbstractEntity=
 	 *        )} subResource The class identifying the resource of the REST API
 	 *        resources within this entity.
 	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
@@ -260,7 +347,8 @@ export default class AbstractEntity {
 	 * @param {function(
 	 *            new: AbstractEntity,
 	 *            RestClient,
-	 *            Object<string, *>
+	 *            Object<string, *>,
+	 *            ?AbstractEntity=
 	 *        )} subResource The class identifying the resource of the REST API
 	 *        resources within this entity.
 	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
@@ -316,7 +404,7 @@ export default class AbstractEntity {
 		let resource = this.constructor;
 		let id = this[resource.idFieldName];
 		let client = this[PRIVATE.restClient];
-		let serializedData = this.serialize(data);
+		let serializedData = this.$serialize(data);
 		return client.patch(
 			resource,
 			id,
@@ -324,6 +412,7 @@ export default class AbstractEntity {
 			options
 		).then((response) => {
 			Object.assign(this, data);
+			this.$validatePropTypes();
 			return response;
 		});
 	}
@@ -347,9 +436,10 @@ export default class AbstractEntity {
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
 	replace(options = {}) {
-		let id = this[this.constructor.idFieldName];
+		let resource = this.constructor;
+		let id = this[resource.idFieldName];
 		let client = this[PRIVATE.restClient];
-		return client.replace(this.constructor, id, this.serialize(), options);
+		return client.replace(resource, id, this.$serialize(), options);
 	}
 
 	/**
@@ -371,7 +461,7 @@ export default class AbstractEntity {
 	 */
 	create(options = {}) {
 		let client = this[PRIVATE.restClient];
-		return client.create(this.constructor, this.serialize(), options);
+		return client.create(this.constructor, this.$serialize(), options);
 	}
 
 	/**
@@ -404,11 +494,36 @@ export default class AbstractEntity {
 	 * Note that this method may not receive a representation of the entity's
 	 * complete state if invoked by the {@linkcode patch()} method.
 	 *
+	 * The default implementation of this method implements a mapping based on
+	 * the {@linkcode dataFieldMapping} property's value.
+	 *
 	 * @return {Object<string, *>} Data object representing this entity in a
 	 *         way that is compatible with the REST API.
 	 */
-	serialize(data = this) {
-		return Object.assign({}, data);
+	$serialize(data = this) {
+		let mappings = this.constructor.dataFieldMapping;
+		let serializedData = Object.assign({}, data);
+
+		for (let entityPropertyName of Object.keys(mappings)) {
+			if (!serializedData.hasOwnProperty(entityPropertyName)) {
+				continue;
+			}
+
+			let mapper = mappings[entityPropertyName];
+			if (typeof mapper === 'object') {
+				let propertyValue = serializedData[entityPropertyName];
+				let serializedValue = mapper.serialize(propertyValue);
+				serializedData[mapper.dataFieldName] = serializedValue;
+				if (entityPropertyName !== mapper.dataFieldName) {
+					delete serializedData[entityPropertyName];
+				}
+			} else if (entityPropertyName !== mapper) {
+				serializedData[mapper] = serializedData[entityPropertyName];
+				delete serializedData[entityPropertyName];
+			}
+		}
+
+		return serializedData;
 	}
 
 	/**
@@ -418,11 +533,53 @@ export default class AbstractEntity {
 	 * This method can be used to format data, rename fields, generated
 	 * computed fields, etc.
 	 *
+	 * Note that this method may not receive a representation of the entity's
+	 * complete state in some cases.
+	 *
+	 * The default implementation of this method implements a mapping based on
+	 * the {@linkcode dataFieldMapping} property's value.
+	 *
 	 * @param {Object<string, *>} data The data retrieved from the REST API.
 	 * @return {Object<string, *>} The data ready to be assigned to this
 	 *         entity.
 	 */
-	deserialize(data) {
+	$deserialize(data) {
+		let mappings = this.constructor.dataFieldMapping;
+		let deserializedData = Object.assign({}, data);
+
+		for (let entityPropertyName of Object.keys(mappings)) {
+			if (!deserializedData.hasOwnProperty(entityPropertyName)) {
+				continue;
+			}
+
+			let mapper = mappings[entityPropertyName];
+			if (typeof mapper === 'object') {
+				let rawValue = deserializedData[mapper.dataFieldName];
+				let deserializedValue = mapper.deserialize(rawValue);
+				deserializedData[entityPropertyName] = deserializedValue;
+				if (entityPropertyName !== mapper.dataFieldName) {
+					delete deserializedData[mapper.dataFieldName];
+				}
+			} else if (entityPropertyName !== mapper) {
+				let rawValue = deserializedData[mapper];
+				deserializedData[entityPropertyName] = rawValue;
+				delete deserializedData[mapper];
+			}
+		}
+
 		return data;
+	}
+
+	/**
+	 * Validates the currently set properties of this entity against the
+	 * constraints specified by the static {@linkcode propTypes} property.
+	 *
+	 * @throws {TypeError} Thrown if any of the entity's currently set
+	 *         properties do not comply with the current property validation
+	 *         constraints. The error should carry information about all
+	 *         invalid properties, not just the first one.
+	 */
+	$validatePropTypes() {
+		// override this method to enable property type validation
 	}
 }
