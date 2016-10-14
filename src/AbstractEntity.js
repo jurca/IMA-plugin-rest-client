@@ -268,8 +268,8 @@ export default class AbstractEntity {
 		// We create an entity-like object so that we can serialize the data
 		// and properly create a new entity instance later in the REST API
 		// client.
-		let fakeEntity = Object.create(this.prototype);
-		fakeEntity.constructor = this;
+		let fakeEntity = Object.create(Object.create(this.prototype));
+		Object.getPrototypeOf(fakeEntity).constructor = this;
 		fakeEntity[PRIVATE.restClient] = restClient;
 		fakeEntity[PRIVATE.parentEntity] = parentEntity;
 		Object.assign(fakeEntity, data);
