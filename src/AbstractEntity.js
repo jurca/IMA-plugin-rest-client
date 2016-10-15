@@ -142,8 +142,8 @@ export default class AbstractEntity {
 	 *           function(new: AbstractDataFieldMapper)|
 	 *           {
 	 *             dataFieldName: ?string,
-	 *             deserialize: function(*): *,
-	 *             serialize: function(*): *
+	 *             deserialize: function(*, AbstractEntity): *,
+	 *             serialize: function(*, AbstractEntity): *
 	 *           }
 	 *         )>} The description of how the raw data properties should be
 	 *         mapped to the entity properties and vice versa.
@@ -502,24 +502,22 @@ export default class AbstractEntity {
 	 */
 	$serialize(data = this) {
 		let mappings = this.constructor.dataFieldMapping;
-		let serializedData = Object.assign({}, data);
 
-		for (let entityPropertyName of Object.keys(mappings)) {
-			if (!serializedData.hasOwnProperty(entityPropertyName)) {
+		let serializedData = {};
+		for (let entityPropertyName of Object.keys(data)) {
+			if (!mappings.hasOwnProperty(entityPropertyName)) {
+				serializedData[entityPropertyName] = data[entityPropertyName];
 				continue;
 			}
-
 			let mapper = mappings[entityPropertyName];
-			if (typeof mapper === 'object') {
-				let propertyValue = serializedData[entityPropertyName];
-				let serializedValue = mapper.serialize(propertyValue);
-				serializedData[mapper.dataFieldName] = serializedValue;
-				if (entityPropertyName !== mapper.dataFieldName) {
-					delete serializedData[entityPropertyName];
-				}
-			} else if (entityPropertyName !== mapper) {
-				serializedData[mapper] = serializedData[entityPropertyName];
-				delete serializedData[entityPropertyName];
+			let value = data[entityPropertyName];
+			if (mapper instanceof Object) {
+				let serializedValue = mapper.serialize(value, this);
+				let dataFieldName = mapper.dataFieldName === null ?
+						entityPropertyName : mapper.dataFieldName;
+				serializedData[dataFieldName] = serializedValue;
+			} else {
+				serializedData[mapper] = value;
 			}
 		}
 
@@ -545,29 +543,35 @@ export default class AbstractEntity {
 	 */
 	$deserialize(data) {
 		let mappings = this.constructor.dataFieldMapping;
-		let deserializedData = Object.assign({}, data);
-
+		let mappedDataProperties = {};
 		for (let entityPropertyName of Object.keys(mappings)) {
-			if (!deserializedData.hasOwnProperty(entityPropertyName)) {
-				continue;
-			}
-
 			let mapper = mappings[entityPropertyName];
-			if (typeof mapper === 'object') {
-				let rawValue = deserializedData[mapper.dataFieldName];
-				let deserializedValue = mapper.deserialize(rawValue);
-				deserializedData[entityPropertyName] = deserializedValue;
-				if (entityPropertyName !== mapper.dataFieldName) {
-					delete deserializedData[mapper.dataFieldName];
-				}
-			} else if (entityPropertyName !== mapper) {
-				let rawValue = deserializedData[mapper];
-				deserializedData[entityPropertyName] = rawValue;
-				delete deserializedData[mapper];
+			if (mapper instanceof Object) {
+				let dataFieldName = mapper.dataFieldName;
+				mappedDataProperties[dataFieldName] = entityPropertyName;
+			} else {
+				mappedDataProperties[mapper] = entityPropertyName;
 			}
 		}
 
-		return data;
+		let deserializedData = {};
+		for (let propertyName of Object.keys(data)) {
+			if (!mappedDataProperties.hasOwnProperty(propertyName)) {
+				deserializedData[propertyName] = data[propertyName];
+				continue;
+			}
+			let entityPropertyName = mappedDataProperties[propertyName];
+			let rawValue = data[propertyName];
+			let mapper = mappings[entityPropertyName];
+			if (mapper instanceof Object) {
+				let deserializedValue = mapper.deserialize(rawValue, this);
+				deserializedData[entityPropertyName] = deserializedValue;
+			} else {
+				deserializedData[entityPropertyName] = rawValue;
+			}
+		}
+
+		return deserializedData;
 	}
 
 	/**

@@ -1,4 +1,5 @@
 
+import AbstractDataFieldMapper from '../AbstractDataFieldMapper';
 import AbstractEntity from '../AbstractEntity';
 import AbstractRestClient from '../AbstractRestClient';
 
@@ -106,6 +107,10 @@ describe('AbstractEntity', () => {
 		}))).$parentEntity).toEqual(new Entity(restClient, {
 			id: 'yup'
 		}));
+	});
+
+	it('should keep reference to the REST API client', () => {
+		expect(new Entity(restClient, {}).$restClient).toBe(restClient);
 	});
 
 	it('should allow listing of entities', (done) => {
@@ -383,6 +388,145 @@ describe('AbstractEntity', () => {
 					dynamic: true
 				});
 				done();
+			});
+		});
+
+		it('should allow declarative property mapping', () => {
+			class DeclarativelyMappedEntity extends Entity {
+				static get dataFieldMapping() {
+					return {
+						someField: 'some_field',
+						another: 'another'
+					};
+				}
+			}
+
+			let entity = new DeclarativelyMappedEntity(restClient, {
+				id: 1, // not mapped
+				some_field: 'and here is the value',
+				another: 'that is not renamed'
+			});
+			let entityProperties = Object.assign({}, entity);
+			expect(entityProperties).toEqual({
+				id: 1,
+				someField: 'and here is the value',
+				another: 'that is not renamed'
+			});
+
+			expect(entity.$serialize()).toEqual({
+				id: 1,
+				some_field: 'and here is the value',
+				another: 'that is not renamed'
+			});
+		});
+
+		it('should allow declarative property mapping using mapper object',
+				() => {
+			class MappingEntity extends Entity {
+				static get dataFieldMapping() {
+					return {
+						id: {
+							dataFieldName: '_id',
+							serialize(value, processedEntity) {
+								expect(
+									processedEntity instanceof MappingEntity
+								).toBe(true);
+								return -value;
+							},
+							deserialize(value, processedEntity) {
+								expect(
+									processedEntity instanceof MappingEntity
+								).toBe(true);
+								return -value;
+							}
+						},
+						foo: {
+							dataFieldName: null,
+							serialize(value, processedEntity) {
+								return value;
+							},
+							deserialize(value, processedEntity) {
+								return value
+							}
+						},
+						bar: {
+							dataFieldName: 'bar',
+							serialize(value, processedEntity) {
+								return value;
+							},
+							deserialize(value, processedEntity) {
+								return value
+							}
+						}
+					};
+				}
+			}
+
+			let entity = new MappingEntity(restClient, {
+				_id: 123,
+				foo: 'a',
+				bar: 'b'
+			});
+			expect(Object.assign({}, entity)).toEqual({
+				id: -123,
+				foo: 'a',
+				bar: 'b'
+			});
+			expect(entity.$serialize()).toEqual({
+				_id: 123,
+				foo: 'a',
+				bar: 'b'
+			});
+		});
+
+		it('should allow declarative property mapping using mapper classes',
+				() => {
+			class MappingEntity extends Entity {
+				static get dataFieldMapping() {
+					return {
+						id: AbstractDataFieldMapper.makeMapper(
+							'_id',
+							(value, processedEntity) => {
+								expect(
+									processedEntity instanceof MappingEntity
+								).toBe(true);
+								return -value;
+							},
+							(value, processedEntity) => {
+								expect(
+									processedEntity instanceof MappingEntity
+								).toBe(true);
+								return -value;
+							}
+						),
+						foo: AbstractDataFieldMapper.makeMapper(
+							null,
+							value => value,
+							value => value
+						),
+						bar: AbstractDataFieldMapper.makeMapper(
+							'bar',
+							value => value,
+							value => value
+						)
+					};
+				}
+			}
+
+			let entity = new MappingEntity(restClient, {
+				_id: 123,
+				foo: 'a',
+				bar: 'b'
+			});
+			expect(Object.assign({}, entity)).toEqual({
+				id: -123,
+				foo: 'a',
+				bar: 'b'
+			});
+			expect(entity.$serialize()).toEqual({
+				_id: 123,
+				foo: 'a',
+				bar: 'b'
 			});
 		});
 
