@@ -100,7 +100,7 @@ export default class AbstractDataFieldMapper {
 	 *
 	 * @param {?string} dataFieldName The name of the raw data field being
 	 *        mapped, or {@code null} if it is the same as the name of the
-	 *        entity property being mapped..
+	 *        entity property being mapped.
 	 * @param {function(*, AbstractEntity): *} deserialize The callback to use
 	 *        for deserialization of a raw value.
 	 * @param {function(*, AbstractEntity): *} serialize The callback to use
