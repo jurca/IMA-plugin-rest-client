@@ -530,6 +530,155 @@ describe('AbstractEntity', () => {
 			});
 		});
 
+		it('should allow create field mappers from entity classes', () => {
+			class Session extends Entity {}
+
+			class User extends Entity {
+				static get dataFieldMapping() {
+					return {
+						session: Session.asDataFieldMapper('_session'),
+						otherSession: Session.asDataFieldMapper(
+							'otherSession'
+						),
+						anotherSession: Session.asDataFieldMapper()
+					};
+				}
+			}
+
+			let entity = new User(restClient, {
+				id: 1,
+				_session: { id: 'ABC' },
+				otherSession: { id: 'DEF' },
+				anotherSession: { id: 'GHI' }
+			});
+			let templateEntity = new User(restClient, {});
+			templateEntity.id = 1;
+			templateEntity.session = new Session(restClient, { id: 'ABC' });
+			templateEntity.otherSession = new Session(restClient, {
+				id: 'DEF'
+			});
+			templateEntity.anotherSession = new Session(restClient, {
+				id: 'GHI'
+			});
+			expect(entity).toEqual(templateEntity);
+			expect(entity.session.$parentEntity).toBe(entity);
+			expect(entity.otherSession.$parentEntity).toBe(entity);
+			expect(entity.anotherSession.$parentEntity).toBe(entity);
+
+			expect(templateEntity.$serialize()).toEqual({
+				id: 1,
+				_session: { id: 'ABC' },
+				otherSession: { id: 'DEF' },
+				anotherSession: { id: 'GHI' }
+			});
+		});
+
+	});
+
+	describe('immutability', () => {
+
+		class ImmutableEntity extends AbstractEntity {
+			static get isImmutable() {
+				return true;
+			}
+		}
+
+		it('should be mutable by default', () => {
+			class Entity extends AbstractEntity {}
+
+			let entity = new Entity(restClient, { id: 1 });
+			entity.id = 2;
+			entity.foo = 'bar';
+			Object.defineProperty(entity, 'id', {
+				enumerable: false
+			});
+		});
+
+		it('should be deeply immutable if marked as such', () => {
+			let entity = new ImmutableEntity(restClient, {
+				id: 1,
+				foo: {
+					bar: {
+						baz: 2
+					}
+				}
+			});
+			expect(Object.isFrozen(entity)).toBe(true);
+			expect(Object.isFrozen(entity.foo)).toBe(true);
+			expect(Object.isFrozen(entity.foo.bar)).toBe(true);
+		});
+
+		it('should be able to clone an entity', () => {
+			let entity = new ImmutableEntity(restClient, {
+				id: 1,
+				text: 'is a text',
+				created: new Date(),
+				regexp: /a/
+			}, new ImmutableEntity(restClient, {
+				id: 'xy',
+				isParent: true
+			}, new ImmutableEntity(restClient, {
+				id: 'grand-parent',
+				isGrandParent: true
+			})));
+			let clone = entity.clone();
+			expect(clone).not.toBe(entity);
+			expect(clone).toEqual(entity);
+			expect(clone.$parentEntity).toBe(entity.$parentEntity);
+			expect(clone.clone()).not.toBe(clone);
+
+			let deepClone = entity.clone(true);
+			expect(deepClone).not.toBe(entity);
+			expect(deepClone).not.toBe(clone);
+			expect(deepClone).toEqual(entity);
+			expect(deepClone.$parentEntity).not.toBe(entity.$parentEntity);
+			expect(deepClone.$parentEntity.$parentEntity).not.toBe(
+				entity.$parentEntity.$parentEntity
+			);
+		});
+
+		it('should enable creating modified clones of the entity', () => {
+			let entity = new ImmutableEntity(restClient, {
+				id: 1,
+				foo: 'bar'
+			});
+			let patchedEntity = entity.cloneAndPatch({
+				id: 2,
+				baz: '000'
+			});
+			expect(patchedEntity.$serialize()).toEqual({
+				id: 2,
+				foo: 'bar',
+				baz: '000'
+			});
+		});
+
+		it('should be compatible with the patch() method', (done) => {
+			class ImmutableMockEntity extends Entity {
+				static get isImmutable() {
+					return true;
+				}
+			}
+
+			let entity = new ImmutableMockEntity(restClient, {
+				id: 1,
+				foo: 'bar'
+			});
+			restResult = {
+				id: 1,
+				foo: 'baz'
+			};
+			entity.patch({ foo: 'baz' }).then((patchedEntity) => {
+				expect(entity.foo).toBe('bar');
+				expect(patchedEntity.foo).toBe('baz');
+				done();
+			}).catch((error) => {
+				fail(error);
+				done();
+			});
+			expect(entity.foo).toBe('bar');
+		});
+
 	});
 	
 });

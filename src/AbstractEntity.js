@@ -8,8 +8,12 @@ import RestClient from './RestClient';
  * @type {Object<string, symbol>}
  */
 const PRIVATE = Object.freeze({
+	// private fields
 	restClient: Symbol('restClient'),
-	parentEntity: Symbol('parentEntity')
+	parentEntity: Symbol('parentEntity'),
+
+	// private methods
+	deepFreeze: Symbol('deepFreeze')
 });
 
 /**
@@ -55,6 +59,10 @@ export default class AbstractEntity {
 		Object.assign(this, entityData);
 
 		this.$validatePropTypes();
+
+		if (this.constructor.isImmutable) {
+			this[PRIVATE.deepFreeze](this);
+		}
 	}
 
 	/**
@@ -150,6 +158,55 @@ export default class AbstractEntity {
 	 */
 	static get dataFieldMapping() {
 		return {};
+	}
+
+	/**
+	 * Flag specifying whether the instances of this entity class should be
+	 * made automatically immutable (the instance will be deeply frozen) upon
+	 * instantiation.
+	 *
+	 * Setting this flag also modifies behavior of methods that would otherwise
+	 * modify the state of the entity to just return a modified version (as
+	 * they already do) without modifying the instance these methods are
+	 * invoked on.
+	 *
+	 * Note that the deep freeze of the entity's state will be applied in the
+	 * {@linkcode AbstractEntity}'s constructor, therefore the constructors
+	 * of classes extending this one cannot make final adjustments of the
+	 * entity's state once a call to the {@code super}-constructor has been
+	 * made.
+	 *
+	 * @return {boolean} Whether the instances of this entity class should be
+	 *         made automatically immutable upon instantiation.
+	 */
+	static get isImmutable() {
+		return false;
+	}
+
+	/**
+	 * Creates a data field mapper for mapping the property of the specified
+	 * name in the raw data to an instance of this entity class. The generated
+	 * entity instance will use the rest client of the entity having its data
+	 * mapped. The entity having its data mapped will also be set as the parent
+	 * entity of the generated entity.
+	 *
+	 * @param {?string} dataFieldName The name of the raw data field being
+	 *        mapped, or {@code null} if it is the same as the name of the
+	 *        entity property being mapped.
+	 * @return {function(new: AbstractDataFieldMapper)} The generated data
+	 *         field mapper.
+	 */
+	static asDataFieldMapper(dataFieldName = null) {
+		let entityClass = this;
+		return AbstractDataFieldMapper.makeMapper(
+			dataFieldName,
+			(data, parentEntity) => new entityClass(
+				parentEntity.$restClient,
+				data,
+				parentEntity
+			),
+			entity => entity.$serialize()
+		);
 	}
 
 	/**
@@ -411,7 +468,9 @@ export default class AbstractEntity {
 			serializedData,
 			options
 		).then((response) => {
-			Object.assign(this, data);
+			if (!resource.isImmutable) {
+				Object.assign(this, data);
+			}
 			this.$validatePropTypes();
 			return response;
 		});
@@ -487,6 +546,45 @@ export default class AbstractEntity {
 	}
 
 	/**
+	 * Creates a clone of this entity.
+	 *
+	 * @param {boolean=} includingParent The flag specifying whether the parent
+	 *        entity should be cloned as well. The parent entity will be only
+	 *        referenced when this flag is not set. Defaults to {@code false}.
+	 * @return {AbstractEntity} A clone of this entity.
+	 */
+	clone(includingParent = false) {
+		let data = this.$serialize();
+		let entityClass = this.constructor;
+		let parentEntity = this[PRIVATE.parentEntity];
+		if (includingParent && parentEntity) {
+			parentEntity = parentEntity.clone(includingParent);
+		}
+		return new entityClass(this[PRIVATE.restClient], data, parentEntity);
+	}
+
+	/**
+	 * Creates a clone of this entity with its state patched using the provided
+	 * state patch object.
+	 *
+	 * Note that this method is meant to be used primarily for creating
+	 * modified versions of immutable entities.
+	 *
+	 * @param {Object<string, *>} statePatch The patch of this entity's state
+	 *        that should be applied to the clone.
+	 * @return {AbstractEntity} The created patched clone.
+	 */
+	cloneAndPatch(statePatch) {
+		let data = this.$serialize();
+		let patchData = this.$serialize(statePatch);
+		let patchedData = Object.assign({}, data, patchData);
+		let entityClass = this.constructor;
+		let restClient = this[PRIVATE.restClient];
+		let parentEntity = this[PRIVATE.parentEntity];
+		return new entityClass(restClient, patchedData, parentEntity);
+	}
+
+	/**
 	 * Serializes this entity into a JSON-compatible plain JavaScript object
 	 * that has a structure that is compatible with the entity's REST API
 	 * resource.
@@ -548,6 +646,9 @@ export default class AbstractEntity {
 			let mapper = mappings[entityPropertyName];
 			if (mapper instanceof Object) {
 				let dataFieldName = mapper.dataFieldName;
+				if (dataFieldName === null) {
+					dataFieldName = entityPropertyName;
+				}
 				mappedDataProperties[dataFieldName] = entityPropertyName;
 			} else {
 				mappedDataProperties[mapper] = entityPropertyName;
@@ -585,5 +686,25 @@ export default class AbstractEntity {
 	 */
 	$validatePropTypes() {
 		// override this method to enable property type validation
+	}
+
+	/**
+	 * Deeply freezes the provided data.
+	 *
+	 * Note that the method cannot properly handle data with circular
+	 * references.
+	 *
+	 * @param {*} data The data that should become deeply frozen.
+	 */
+	[PRIVATE.deepFreeze](data) {
+		if (!(data instanceof Object)) {
+			return; // primitive values are immutable
+		}
+
+		for (let propertyName of Object.keys(data)) {
+			this[PRIVATE.deepFreeze](data[propertyName]);
+		}
+
+		Object.freeze(data);
 	}
 }
