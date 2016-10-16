@@ -48,6 +48,8 @@ export default class AbstractDataFieldMapper {
 	 * This setter is used for compatibility with the Public Class Fields ES
 	 * proposal (at stage 2 at the moment of writing this).
 	 *
+	 * See the related getter for more details about this property.
+	 *
 	 * @param {?string} dataFieldName The name of the raw data property to map
 	 *        to an entity property using this mapper.
 	 */
