@@ -4,7 +4,15 @@
  * entity class, which specifies the automatic mapping of raw entity data to
  * entity properties.
  *
- * @param {string} dataFieldMapping The descriptor of how the entity data
+ * @param {Object<string, (
+ *          string|
+ *          function(new: AbstractDataFieldMapper)|
+ *          {
+ *            dataFieldName: ?string,
+ *            deserialize: function(*, AbstractEntity): *,
+ *            serialize: function(*, AbstractEntity): *
+ *          }
+ *        )>} dataFieldMapping The descriptor of how the entity data
  *        should be mapped to the entity's properties.
  * @return {function(function(
  *             new: AbstractEntity,

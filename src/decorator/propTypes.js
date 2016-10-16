@@ -3,7 +3,7 @@
  * Decorator for setting the static {@code propTypes} property of an  entity
  * class, which specifies the types of the entity's data-holding properties.
  *
- * @param {string} propTypes The descriptor of types of the entity's
+ * @param {Object<string, *>} propTypes The descriptor of types of the entity's
  *        data-holding properties.
  * @return {function(function(
  *             new: AbstractEntity,
