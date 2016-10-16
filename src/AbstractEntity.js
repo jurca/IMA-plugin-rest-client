@@ -8,6 +8,20 @@ import RestClient from './RestClient';
  * @type {Object<string, symbol>}
  */
 const PRIVATE = Object.freeze({
+	// static private fields
+	resourceName: Symbol('resourceName'),
+	resourceNameConfigured: Symbol('resourceNameConfigured'),
+	idFieldName: Symbol('idFieldName'),
+	idFieldNameConfigured: Symbol('idFieldNameConfigured'),
+	inlineResponseBody: Symbol('inlineResponseBody'),
+	inlineResponseBodyConfigured: Symbol('inlineResponseBodyConfigured'),
+	propTypes: Symbol('propTypes'),
+	propTypesConfigured: Symbol('propTypesConfigured'),
+	dataFieldMapping: Symbol('dataFieldMapping'),
+	dataFieldMappingConfigured: Symbol('dataFieldMappingConfigured'),
+	isImmutable: Symbol('isImmutable'),
+	isImmutableConfigured: Symbol('isImmutableConfigured'),
+
 	// private fields
 	restClient: Symbol('restClient'),
 	parentEntity: Symbol('parentEntity'),
@@ -75,8 +89,33 @@ export default class AbstractEntity {
 	 *         entity.
 	 */
 	static get resourceName() {
-		throw new Error('The resourceName getter is abstract and must be ' +
-				'overridden');
+		if (!this[PRIVATE.resourceNameConfigured]) {
+			throw new Error(
+				'The resourceName getter is abstract and must be overridden'
+			);
+		}
+
+		return this[PRIVATE.resourceName];
+	}
+
+	/**
+	 * This setter is used for compatibility with the Public Class Fields ES
+	 * proposal (at stage 2 at the moment of writing this).
+	 *
+	 * See the related getter for more details about this property.
+	 *
+	 * @param {string} resourceName The name of the REST API resource
+	 *        containing this entity.
+	 */
+	static set resourceName(resourceName) {
+		if (this[PRIVATE.resourceNameConfigured]) {
+			throw new TypeError(
+				'The resourceName property cannot be reconfigured'
+			);
+		}
+
+		this[PRIVATE.resourceName] = resourceName;
+		this[PRIVATE.resourceNameConfigured] = true;
 	}
 
 	/**
@@ -86,8 +125,33 @@ export default class AbstractEntity {
 	 * @return {string} The name of the field containing the entity's ID.
 	 */
 	static get idFieldName() {
-		throw new Error('The idFieldName getter is abstract and must be ' +
-				'overridden');
+		if (!this[PRIVATE.idFieldNameConfigured]) {
+			throw new Error(
+				'The idFieldName getter is abstract and must be overridden'
+			);
+		}
+
+		return this[PRIVATE.idFieldName];
+	}
+
+	/**
+	 * This setter is used for compatibility with the Public Class Fields ES
+	 * proposal (at stage 2 at the moment of writing this).
+	 *
+	 * See the related getter for more details about this property.
+	 *
+	 * @param {string} idFieldName The name of the field containing the
+	 *        entity's ID.
+	 */
+	static set idFieldName(idFieldName) {
+		if (this[PRIVATE.idFieldNameConfigured]) {
+			throw new TypeError(
+				'The idFieldName property cannot be reconfigured'
+			);
+		}
+
+		this[PRIVATE.idFieldName] = idFieldName;
+		this[PRIVATE.idFieldNameConfigured] = true;
 	}
 
 	/**
@@ -103,7 +167,32 @@ export default class AbstractEntity {
 	 *         return only the response body instead of the response object.
 	 */
 	static get inlineResponseBody() {
-		return false;
+		if (!this[PRIVATE.inlineResponseBodyConfigured]) {
+			return false;
+		}
+
+		return this[PRIVATE.inlineResponseBody];
+	}
+
+	/**
+	 * This setter is used for compatibility with the Public Class Fields ES
+	 * proposal (at stage 2 at the moment of writing this).
+	 *
+	 * See the related getter for more details about this property.
+	 *
+	 * @param {boolean} inlineResponseBody The flag specifying whether the REST
+	 *        client should return only the response body instead of the
+	 *        response object.
+	 */
+	static set inlineResponseBody(inlineResponseBody) {
+		if (this[PRIVATE.inlineResponseBodyConfigured]) {
+			throw new TypeError(
+				'The inlineResponseBody property cannot be reconfigured'
+			);
+		}
+
+		this[PRIVATE.inlineResponseBody] = inlineResponseBody;
+		this[PRIVATE.inlineResponseBodyConfigured] = true;
 	}
 
 	/**
@@ -125,7 +214,31 @@ export default class AbstractEntity {
 	 *         applied to this entity's properties.
 	 */
 	static get propTypes() {
-		return {};
+		if (!this[PRIVATE.propTypesConfigured]) {
+			return {};
+		}
+
+		return this[PRIVATE.propTypes];
+	}
+
+	/**
+	 * This setter is used for compatibility with the Public Class Fields ES
+	 * proposal (at stage 2 at the moment of writing this).
+	 *
+	 * See the related getter for more details about this property.
+	 *
+	 * @param {Object<string, *>} propTypes The validation constrains that
+	 *        should be applied to this entity's properties.
+	 */
+	static set propTypes(propTypes) {
+		if (this[PRIVATE.propTypesConfigured]) {
+			throw new TypeError(
+				'The propTypes property cannot be reconfigured'
+			);
+		}
+
+		this[PRIVATE.propTypes] = propTypes;
+		this[PRIVATE.propTypesConfigured] = true;
 	}
 
 	/**
@@ -157,7 +270,40 @@ export default class AbstractEntity {
 	 *         mapped to the entity properties and vice versa.
 	 */
 	static get dataFieldMapping() {
-		return {};
+		if (!this[PRIVATE.dataFieldMappingConfigured]) {
+			return {};
+		}
+
+		return this[PRIVATE.dataFieldMapping];
+	}
+
+	/**
+	 * This setter is used for compatibility with the Public Class Fields ES
+	 * proposal (at stage 2 at the moment of writing this).
+	 *
+	 * See the related getter for more details about this property.
+	 *
+	 * @param {Object<string, (
+	 *          string|
+	 *          function(new: AbstractDataFieldMapper)|
+	 *          {
+	 *            dataFieldName: ?string,
+	 *            deserialize: function(*, AbstractEntity): *,
+	 *            serialize: function(*, AbstractEntity): *
+	 *          }
+	 *        )>} dataFieldMapping The description of how the raw data
+	 *        properties should be mapped to the entity properties and vice
+	 *        versa.
+	 */
+	static set dataFieldMapping(dataFieldMapping) {
+		if (this[PRIVATE.dataFieldMappingConfigured]) {
+			throw new TypeError(
+				'The dataFieldMapping property cannot be reconfigured'
+			);
+		}
+
+		this[PRIVATE.dataFieldMapping] = dataFieldMapping;
+		this[PRIVATE.dataFieldMappingConfigured] = true;
 	}
 
 	/**
@@ -180,7 +326,31 @@ export default class AbstractEntity {
 	 *         made automatically immutable upon instantiation.
 	 */
 	static get isImmutable() {
-		return false;
+		if (!this[PRIVATE.isImmutableConfigured]) {
+			return false;
+		}
+
+		return this[PRIVATE.isImmutable];
+	}
+
+	/**
+	 * This setter is used for compatibility with the Public Class Fields ES
+	 * proposal (at stage 2 at the moment of writing this).
+	 *
+	 * See the related getter for more details about this property.
+	 *
+	 * @param {boolean} isImmutable Whether the instances of this entity class
+	 *        should be made automatically immutable upon instantiation.
+	 */
+	static set isImmutable(isImmutable) {
+		if (this[PRIVATE.isImmutableConfigured]) {
+			throw new TypeError(
+				'The isImmutable property cannot be reconfigured'
+			);
+		}
+
+		this[PRIVATE.isImmutable] = isImmutable;
+		this[PRIVATE.isImmutableConfigured] = true;
 	}
 
 	/**

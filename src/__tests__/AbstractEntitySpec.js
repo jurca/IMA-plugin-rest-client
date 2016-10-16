@@ -680,5 +680,65 @@ describe('AbstractEntity', () => {
 		});
 
 	});
+
+	describe('static properties', () => {
+
+		it('should be possible to configure resourceName exactly once', () => {
+			testStaticProperty('resourceName', null, true, 'fooBar');
+		});
+
+		it('should be possible to configure idFieldName exactly once', () => {
+			testStaticProperty('idFieldName', null, true, 'id');
+		});
+
+		it('should be possible to configure inlineResponseBody exactly once',
+				() => {
+			testStaticProperty('inlineResponseBody', false, false, true);
+		});
+
+		it('should be possible to configure propTypes exactly once', () => {
+			testStaticProperty('propTypes', {}, false, { id: 'integer:>0' });
+		});
+
+		it('should be possible to configure dataFieldMapping exactly once',
+				() => {
+			testStaticProperty('dataFieldMapping', {}, false, { id: '_id' });
+		});
+
+		it('should be possible to configure isImmutable exactly once', () => {
+			testStaticProperty('isImmutable', false, false, true);
+		});
+
+		function testStaticProperty(propertyName, defaultValue, throwsError,
+				testingValue) {
+			class Entity1 extends AbstractEntity {}
+			class Entity2 extends AbstractEntity {}
+
+			if (throwsError) {
+				expect(() => {
+					return Entity1[propertyName];
+				}).toThrow();
+			} else {
+				expect(Entity1[propertyName]).toEqual(defaultValue);
+			}
+
+			Entity2[propertyName] = testingValue;
+			expect(Entity2[propertyName]).toBe(testingValue);
+
+			// The property must not be affected on other entity classes
+			if (throwsError) {
+				expect(() => {
+					return Entity1[propertyName];
+				}).toThrow();
+			} else {
+				expect(Entity1[propertyName]).toEqual(defaultValue);
+			}
+
+			expect(() => {
+				Entity2[propertyName] = testingValue;
+			}).toThrow();
+		}
+
+	});
 	
 });
