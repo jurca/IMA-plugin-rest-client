@@ -8,8 +8,9 @@
  *        entity's ID.
  * @return {function(function(
  *             new: AbstractEntity,
- *             restClient: RestClient,
- *             data: Object<string, *>
+ *             RestClient,
+ *             Object<string, *>,
+ *             ?AbstractEntity=
  *         ))} Callback that sets the name of the field containing the entity's
  *         ID.
  */

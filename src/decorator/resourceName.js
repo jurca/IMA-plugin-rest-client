@@ -7,8 +7,9 @@
  * @param {string} resourceName The name of the REST API resource.
  * @return {function(function(
  *             new: AbstractEntity,
- *             restClient: RestClient,
- *             data: Object<string, *>
+ *             RestClient,
+ *             Object<string, *>,
+ *             ?AbstractEntity=,
  *         ))} Callback that sets the resource name on the class provided to
  *         it.
  */

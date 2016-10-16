@@ -7,9 +7,9 @@
  *
  * @param {function(
  *            new: AbstractEntity,
- *            restClient: RestClient,
- *            data: Object<string, *>,
- *            parentEntity: ?AbstractEntity=
+ *            RestClient,
+ *            Object<string, *>,
+ *            ?AbstractEntity=
  *        )} classConstructor The entity class.
  */
 export default (classConstructor) => {
