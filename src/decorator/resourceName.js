@@ -18,5 +18,5 @@ export default (resourceName) => {
 		Object.defineProperty(classConstructor, 'resourceName', {
 			value: resourceName
 		});
-	}
-}
+	};
+};
