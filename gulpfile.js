@@ -1,7 +1,7 @@
 require('babel-core/register.js')({
 	'plugins': [
-		'babel-plugin-transform-es2015-modules-commonjs'
-	].map(require.resolve) // fixes the issue with babel loader & linked modules
+		require('babel-plugin-transform-es2015-modules-commonjs')
+	]
 });
 
 let del = require('del');
@@ -9,7 +9,13 @@ let gulp = require('gulp');
 let babel = require('gulp-babel');
 let jasmine = require('gulp-jasmine');
 
-gulp.task('build', ['clean', 'build:js', 'copy:metafile'], () => {
+gulp.task('build', ['clean', 'build:js', 'copy'], () => {});
+
+gulp.task('copy', ['copy:metafile', 'copy:readme'], () => {});
+
+gulp.task('copy:readme', ['clean'], () => {
+	return gulp.src('./README.md')
+		.pipe(gulp.dest('./dist'));
 });
 
 gulp.task('copy:metafile', ['clean'], () => {
