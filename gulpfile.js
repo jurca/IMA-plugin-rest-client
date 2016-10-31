@@ -9,41 +9,53 @@ let gulp = require('gulp');
 let babel = require('gulp-babel');
 let jasmine = require('gulp-jasmine');
 
-gulp.task('build', ['clean', 'build:js', 'copy'], () => {});
+exports.build = function build() {
+	return gulp.series(
+		clean,
+		gulp.parallel(
+			build_js,
+			copy
+		)
+	);
+};
 
-gulp.task('copy', ['copy:metafile', 'copy:readme'], () => {});
+exports.copy = function copy() {
+	return gulp.parallel(exports.copy_metafile, copy_readme);
+};
 
-gulp.task('copy:readme', ['clean'], () => {
-	return gulp.src('./README.md')
+exports.copy_readme = function copy_readme() {
+	return gulp
+		.src('./README.md')
 		.pipe(gulp.dest('./dist'));
-});
+};
 
-gulp.task('copy:metafile', ['clean'], () => {
-	return gulp.src('./package.json')
+exports.copy_metafile = function copy_metafile() {
+	return gulp
+		.src('./package.json')
 		.pipe(gulp.dest('./dist'));
-});
+};
 
-gulp.task('build:js', ['clean'], () => {
-	return gulp.src('./src/**/!(*Spec).js')
+exports.build_js = function build_js() {
+	return gulp
+		.src('./src/**/!(*Spec).js')
 		.pipe(babel({
 			moduleIds: true,
 			presets: ['es2015'],
 			plugins: []
 		}))
 		.pipe(gulp.dest('./dist'));
-});
+};
 
-gulp.task('clean', () => {
+exports.clean = function clean() {
 	return del('./dist');
-});
+};
 
-gulp.task('test', () => {
-	return (
-		gulp.src('./src/**/*Spec.js')
-			.pipe(jasmine({ includeStackTrace: true }))
-	);
-});
+exports.test = function test() {
+	return gulp
+		.src('./src/**/*Spec.js')
+		.pipe(jasmine({includeStackTrace: true}));
+};
 
-gulp.task('dev', () => {
-	gulp.watch(['./src/**/*.js'], ['test']);
-});
+exports.dev = function dev() {
+	return gulp.watch(['./src/**/*.js'], test);
+};
