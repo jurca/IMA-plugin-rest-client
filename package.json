@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/jurca/IMA-plugin-rest-client#readme",
   "dependencies": {
-    "clone": "^1.0.2"
+    "clone": "^2.0.0"
   },
   "devDependencies": {
     "babel-core": "^6.7.2",
