@@ -50,9 +50,11 @@ function clean() {
 exports.test = test;
 function test() {
 	return gulp
-		.src('./src/**/*Spec.js')
+		.src('./src/**//*Spec.js')
 		.pipe(jasmine({includeStackTrace: true}));
 }
 
-var dev = gulp.watch(['./src/**/*.js'], test);
 exports.dev = dev;
+function dev() {
+	return gulp.watch(['./src/**/*.js'], test);
+}
