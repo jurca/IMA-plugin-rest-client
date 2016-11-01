@@ -59,6 +59,9 @@ export default class AbstractEntity {
 		 * @type {RestClient}
 		 */
 		this[PRIVATE.restClient] = restClient;
+		Object.defineProperty(this, PRIVATE.restClient, {
+			enumerable: false
+		});
 
 		/**
 		 * The entity within which the resource containing this entity is
@@ -68,6 +71,9 @@ export default class AbstractEntity {
 		 * @type {?AbstractEntity}
 		 */
 		this[PRIVATE.parentEntity] = parentEntity;
+		Object.defineProperty(this, PRIVATE.parentEntity, {
+			enumerable: false
+		});
 
 		let entityData = this.$deserialize(data);
 		Object.assign(this, entityData);
