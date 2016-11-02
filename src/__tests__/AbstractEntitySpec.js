@@ -709,6 +709,21 @@ describe('AbstractEntity', () => {
 			testStaticProperty('isImmutable', false, false, true);
 		});
 
+		it(
+			'should have all its private symbol properties marked as ' +
+			'non-enumerable',
+			() => {
+				let entity = new Entity(restClient, {});
+				for (let symbol of Object.getOwnPropertySymbols(entity)) {
+					let descriptor = Object.getOwnPropertyDescriptor(
+						entity,
+						symbol
+					);
+					expect(descriptor.enumerable).toBe(false);
+				}
+			}
+		);
+
 		function testStaticProperty(propertyName, defaultValue, throwsError,
 				testingValue) {
 			class Entity1 extends AbstractEntity {}
