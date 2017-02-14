@@ -9,9 +9,9 @@ let gulp = require('gulp');
 let babel = require('gulp-babel');
 let jasmine = require('gulp-jasmine');
 
-var copy = gulp.parallel(copy_metafile, copy_readme);
+let copy = gulp.parallel(copy_metafile, copy_readme);
 
-var build = gulp.series(
+let build = gulp.series(
 	clean,
 	gulp.parallel(
 		build_js,
@@ -37,8 +37,8 @@ function build_js() {
 		.src('./src/**/!(*Spec).js')
 		.pipe(babel({
 			moduleIds: true,
-			presets: ['es2015'],
-			plugins: []
+			presets: [],
+			plugins: ['transform-es2015-modules-commonjs']
 		}))
 		.pipe(gulp.dest('./dist'));
 }
