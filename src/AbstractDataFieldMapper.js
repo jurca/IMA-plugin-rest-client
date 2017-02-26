@@ -3,7 +3,9 @@ const PRIVATE = {
 	dataFieldName: Symbol('dataFieldName'),
 	dataFieldNameConfigured: Symbol('dataFieldNameConfigured')
 };
-Object.freeze(PRIVATE);
+if ($Debug) {
+	Object.freeze(PRIVATE);
+}
 
 /**
  * A typed representation of a data field mapper for declarative mapping of raw
@@ -17,10 +19,12 @@ export default class AbstractDataFieldMapper {
 	 * @throws {TypeError} Thrown because this class is static.
 	 */
 	constructor() {
-		throw new TypeError(
-			'The data field mapper classes are always static and therefore ' +
-			'cannot be instantiated'
-		);
+		if ($Debug) {
+			throw new TypeError(
+				'The data field mapper classes are always static and ' +
+				'therefore cannot be instantiated'
+			);
+		}
 	}
 
 	/**
@@ -35,13 +39,16 @@ export default class AbstractDataFieldMapper {
 	 *         associated.
 	 */
 	static get dataFieldName() {
-		if (this[PRIVATE.dataFieldNameConfigured]) {
-			return this[PRIVATE.dataFieldName];
+		if ($Debug) {
+			if (!this[PRIVATE.dataFieldNameConfigured]) {
+				throw new Error(
+					'The dataFieldName property is abstract and must be ' +
+					'overridden'
+				);
+			}
 		}
 
-		throw new Error(
-			'The dataFieldName property is abstract and must be overridden'
-		)
+		return this[PRIVATE.dataFieldName];
 	}
 
 	/**
@@ -54,14 +61,18 @@ export default class AbstractDataFieldMapper {
 	 *        to an entity property using this mapper.
 	 */
 	static set dataFieldName(dataFieldName) {
-		if (this[PRIVATE.dataFieldNameConfigured]) {
-			throw new TypeError(
-				'The dataFieldName property cannot be reconfigured'
-			)
+		if ($Debug) {
+			if (this[PRIVATE.dataFieldNameConfigured]) {
+				throw new TypeError(
+					'The dataFieldName property cannot be reconfigured'
+				)
+			}
 		}
 
 		this[PRIVATE.dataFieldName] = dataFieldName;
-		this[PRIVATE.dataFieldNameConfigured] = true;
+		if ($Debug) {
+			this[PRIVATE.dataFieldNameConfigured] = true;
+		}
 	}
 
 	/**
@@ -117,10 +128,12 @@ export default class AbstractDataFieldMapper {
 			}
 
 			static set dataFieldName(dataFieldName) {
-				throw new TypeError(
-					'The dataFieldName property of generated data field ' +
-					'mappers cannot be reconfigured'
-				);
+				if ($Debug) {
+					throw new TypeError(
+						'The dataFieldName property of generated data field ' +
+						'mappers cannot be reconfigured'
+					);
+				}
 			}
 
 			static deserialize(value, entity) {

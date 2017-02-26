@@ -1,5 +1,6 @@
 
 import clone from 'clone';
+import { deepFreeze } from './utils';
 
 /**
  * Typed representation of a REST API request.
@@ -9,23 +10,23 @@ export default class Request {
 	 * Initializes the request representation using the provided data.
 	 *
 	 * @param {{
-	 *     parentEntity: *,
-	 *     resource: *,
-	 *     parameters: ?Object<string, (number|string)>,
-	 *     method: string,
-	 *     url: string,
-	 *     data: *,
-	 *     headers: Object<string, string>,
-	 *     options: {
-	 *         timeout: number=,
-	 *         ttl: number=,
-	 *         repeatRequest: number=,
-	 *         cache: boolean=,
-	 *         withCredentials: boolean=
-	 *     },
-	 *     serverConfiguration: ?Object<string, *>
-	 * }} requestData The data representing this request. See the fields of
-	 *        this class for more information.
+	 *            parentEntity: *,
+	 *            resource: *,
+	 *            parameters: ?Object<string, (number|string)>,
+	 *            method: string,
+	 *            url: string,
+	 *            data: *,
+	 *            headers: Object<string, string>,
+	 *            options: {
+	 *                timeout: number=,
+	 *                ttl: number=,
+	 *                repeatRequest: number=,
+	 *                cache: boolean=,
+	 *                withCredentials: boolean=
+	 *            },
+	 *            serverConfiguration: ?Object<string, *>
+	 *        }} requestData The data representing this request. See the fields
+	 *        of this class for more information.
 	 */
 	constructor(requestData) {
 		/**
@@ -52,17 +53,12 @@ export default class Request {
 		 * The parameters do not contain the resource entity id, even if one
 		 * was provided.
 		 *
-		 * @type {?Object<string, (number|string|(number|string)[])>}
+		 * @type {?Object<string, (number|string|Array<(number|string)>)>}
 		 */
 		this.parameters = requestData.parameters &&
-				Object.freeze(clone(requestData.parameters));
-		if (this.parameters) {
-			for (let parameterName of Object.keys(this.parameters)) {
-				let value = this.parameters[parameterName];
-				if (value instanceof Array) {
-					Object.freeze(value);
-				}
-			}
+				clone(requestData.parameters);
+		if ($Debug) {
+			deepFreeze(this.parameters);
 		}
 
 		/**
@@ -87,8 +83,10 @@ export default class Request {
 		 * @type {*}
 		 */
 		this.data = clone(requestData.data);
-		if (this.data && (typeof this.data === 'object')) {
-			Object.freeze(this.data);
+		if ($Debug) {
+			if (this.data && (typeof this.data === 'object')) {
+				deepFreeze(this.data);
+			}
 		}
 
 		/**
@@ -98,7 +96,10 @@ export default class Request {
 		 *
 		 * @type {Object<string, string>}
 		 */
-		this.headers = Object.freeze(Object.assign({}, requestData.headers));
+		this.headers = Object.assign({}, requestData.headers);
+		if ($Debug) {
+			Object.freeze(this.headers);
+		}
 
 		/**
 		 * HTTP request options, without the request headers.
@@ -111,7 +112,10 @@ export default class Request {
 		 *     withCredentials: boolean=
 		 * }}
 		 */
-		this.options = Object.freeze(Object.assign({}, requestData.options));
+		this.options = Object.assign({}, requestData.options);
+		if ($Debug) {
+			Object.freeze(this.options);
+		}
 
 		/**
 		 * The REST API client configuration provided by the server. The field
@@ -120,10 +124,12 @@ export default class Request {
 		 * @type {?Object<string, *>}
 		 */
 		this.serverConfiguration = clone(requestData.serverConfiguration);
-		if (this.serverConfiguration) {
-			Object.freeze(this.serverConfiguration);
+		if ($Debug) {
+			deepFreeze(this.serverConfiguration);
 		}
-		
-		Object.freeze(this);
+
+		if ($Debug) {
+			Object.freeze(this);
+		}
 	}
 }

@@ -419,19 +419,19 @@ export default class AbstractRestClient extends RestClient {
 		let methodName;
 		switch (request.method) {
 			case HttpMethod.GET:
-				methodName = "get";
+				methodName = 'get';
 				break;
 			case HttpMethod.POST:
-				methodName = "post";
+				methodName = 'post';
 				break;
 			case HttpMethod.PATCH:
-				methodName = "patch";
+				methodName = 'patch';
 				break;
 			case HttpMethod.PUT:
-				methodName = "put";
+				methodName = 'put';
 				break;
 			case HttpMethod.DELETE:
-				methodName = "delete";
+				methodName = 'delete';
 				break;
 			default:
 				throw new Error(`Unsupported HTTP method ${request.method}`);

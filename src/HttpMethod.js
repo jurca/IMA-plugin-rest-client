@@ -2,39 +2,45 @@
 /**
  * Constants representing the upper-case names of supported HTTP methods.
  */
-export default Object.freeze({
+const HttpMethod = {
 	/**
 	 * The GET HTTP method.
 	 *
 	 * @type {string}
 	 */
-	GET: "GET",
+	GET: 'GET',
 
 	/**
 	 * The POST HTTP method.
 	 *
 	 * @type {string}
 	 */
-	POST: "POST",
+	POST: 'POST',
 
 	/**
 	 * The PATCH HTTP method.
 	 *
 	 * @type {string}
 	 */
-	PATCH: "PATCH",
+	PATCH: 'PATCH',
 
 	/**
 	 * The PUT HTTP method.
 	 *
 	 * @type {string}
 	 */
-	PUT: "PUT",
+	PUT: 'PUT',
 
 	/**
 	 * The DELETE HTTP method.
 	 *
 	 * @type {string}
 	 */
-	DELETE: "DELETE"
-});
+	DELETE: 'DELETE'
+};
+
+if ($Debug) {
+	Object.freeze(HttpMethod);
+}
+
+export default HttpMethod;

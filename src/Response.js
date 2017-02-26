@@ -2,6 +2,7 @@
 import clone from 'clone';
 import AbstractEntity from './AbstractEntity';
 import Request from './Request';
+import { deepFreeze } from './utils';
 
 /**
  * Typed representation of a REST API response.
@@ -11,13 +12,13 @@ export default class Response {
 	 * Initializes the response representation using the provided data.
 	 *
 	 * @param {{
-	 *     status: number,
-	 *     headers: Object<string, string>.
-	 *     body: *,
-	 *     cached: boolean,
-	 *     request: Request
-	 * }} responseData The data representing this response. See the fields of
-	 *        this class for more information.
+	 *            status: number,
+	 *            headers: Object<string, string>.
+	 *            body: *,
+	 *            cached: boolean,
+	 *            request: Request
+	 *        }} responseData The data representing this response. See the
+	 *        fields of this class for more information.
 	 */
 	constructor(responseData) {
 		/**
@@ -33,25 +34,24 @@ export default class Response {
 		 *
 		 * @type {Object<string, string>}
 		 */
-		this.headers = Object.freeze(Object.assign({}, responseData.headers));
+		this.headers = Object.assign({}, responseData.headers);
+		if ($Debug) {
+			Object.freeze(this.headers);
+		}
 
 		let bodyData;
 		if (responseData.body instanceof Array) {
-			bodyData = responseData.body.map((element) => {
+			bodyData = responseData.body.map(element => {
 				if (element instanceof AbstractEntity) {
 					return element;
 				} else {
-					return Object.freeze(clone(element));
+					return clone(element);
 				}
 			});
-			Object.freeze(bodyData);
 		} else if (responseData.body instanceof AbstractEntity) {
 			bodyData = responseData.body;
 		} else {
 			bodyData = clone(responseData.body);
-			if (bodyData && (typeof bodyData === 'object')) {
-				Object.freeze(bodyData);
-			}
 		}
 
 		/**
@@ -61,6 +61,11 @@ export default class Response {
 		 * @type {*}
 		 */
 		this.body = bodyData;
+		if ($Debug) {
+			if (!(this.body instanceof AbstractEntity)) {
+				deepFreeze(this.body);
+			}
+		}
 
 		/**
 		 * The flag signalling whether this request was handled by the HTTP
@@ -76,7 +81,9 @@ export default class Response {
 		 * @type {Request}
 		 */
 		this.request = new Request(responseData.request);
-		
-		Object.freeze(this);
+
+		if ($Debug) {
+			Object.freeze(this);
+		}
 	}
 }

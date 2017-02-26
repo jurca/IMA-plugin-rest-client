@@ -1,13 +1,14 @@
 
 import AbstractDataFieldMapper from './AbstractDataFieldMapper';
 import RestClient from './RestClient';
+import { deepFreeze } from './utils';
 
 /**
  * Symbols for representing the private fields in the entity.
  *
  * @type {Object<string, symbol>}
  */
-const PRIVATE = Object.freeze({
+const PRIVATE = {
 	// static private fields
 	resourceName: Symbol('resourceName'),
 	resourceNameConfigured: Symbol('resourceNameConfigured'),
@@ -24,11 +25,11 @@ const PRIVATE = Object.freeze({
 
 	// private fields
 	restClient: Symbol('restClient'),
-	parentEntity: Symbol('parentEntity'),
-
-	// private methods
-	deepFreeze: Symbol('deepFreeze')
-});
+	parentEntity: Symbol('parentEntity')
+};
+if ($Debug) {
+	Object.freeze(PRIVATE);
+}
 
 /**
  * The base class for typed REST API entities. Usage of typed entities may be
@@ -48,9 +49,11 @@ export default class AbstractEntity {
 	 *        without a parent.
 	 */
 	constructor(restClient, data, parentEntity = null) {
-		if (!(restClient instanceof RestClient)) {
-			throw new TypeError('The rest client must be a RestClient ' +
-					`instance, ${restClient} provided`);
+		if ($Debug) {
+			if (!(restClient instanceof RestClient)) {
+				throw new TypeError('The rest client must be a RestClient ' +
+						`instance, ${restClient} provided`);
+			}
 		}
 
 		/**
@@ -78,10 +81,12 @@ export default class AbstractEntity {
 		let entityData = this.$deserialize(data);
 		Object.assign(this, entityData);
 
-		this.$validatePropTypes();
+		if ($Debug) {
+			this.$validatePropTypes();
 
-		if (this.constructor.isImmutable) {
-			this[PRIVATE.deepFreeze](this);
+			if (this.constructor.isImmutable) {
+				deepFreeze(this);
+			}
 		}
 	}
 
@@ -95,10 +100,12 @@ export default class AbstractEntity {
 	 *         entity.
 	 */
 	static get resourceName() {
-		if (!this[PRIVATE.resourceNameConfigured]) {
-			throw new Error(
-				'The resourceName getter is abstract and must be overridden'
-			);
+		if ($Debug) {
+			if (!this[PRIVATE.resourceNameConfigured]) {
+				throw new Error(
+					'The resourceName getter is abstract and must be overridden'
+				);
+			}
 		}
 
 		return this[PRIVATE.resourceName];
@@ -114,14 +121,18 @@ export default class AbstractEntity {
 	 *        containing this entity.
 	 */
 	static set resourceName(resourceName) {
-		if (this[PRIVATE.resourceNameConfigured]) {
-			throw new TypeError(
-				'The resourceName property cannot be reconfigured'
-			);
+		if ($Debug) {
+			if (this[PRIVATE.resourceNameConfigured]) {
+				throw new TypeError(
+					'The resourceName property cannot be reconfigured'
+				);
+			}
 		}
 
 		this[PRIVATE.resourceName] = resourceName;
-		this[PRIVATE.resourceNameConfigured] = true;
+		if ($Debug) {
+			this[PRIVATE.resourceNameConfigured] = true;
+		}
 	}
 
 	/**
@@ -131,10 +142,12 @@ export default class AbstractEntity {
 	 * @return {string} The name of the field containing the entity's ID.
 	 */
 	static get idFieldName() {
-		if (!this[PRIVATE.idFieldNameConfigured]) {
-			throw new Error(
-				'The idFieldName getter is abstract and must be overridden'
-			);
+		if ($Debug) {
+			if (!this[PRIVATE.idFieldNameConfigured]) {
+				throw new Error(
+					'The idFieldName getter is abstract and must be overridden'
+				);
+			}
 		}
 
 		return this[PRIVATE.idFieldName];
@@ -150,14 +163,18 @@ export default class AbstractEntity {
 	 *        entity's ID.
 	 */
 	static set idFieldName(idFieldName) {
-		if (this[PRIVATE.idFieldNameConfigured]) {
-			throw new TypeError(
-				'The idFieldName property cannot be reconfigured'
-			);
+		if ($Debug) {
+			if (this[PRIVATE.idFieldNameConfigured]) {
+				throw new TypeError(
+					'The idFieldName property cannot be reconfigured'
+				);
+			}
 		}
 
 		this[PRIVATE.idFieldName] = idFieldName;
-		this[PRIVATE.idFieldNameConfigured] = true;
+		if ($Debug) {
+			this[PRIVATE.idFieldNameConfigured] = true;
+		}
 	}
 
 	/**
@@ -191,14 +208,18 @@ export default class AbstractEntity {
 	 *        response object.
 	 */
 	static set inlineResponseBody(inlineResponseBody) {
-		if (this[PRIVATE.inlineResponseBodyConfigured]) {
-			throw new TypeError(
-				'The inlineResponseBody property cannot be reconfigured'
-			);
+		if ($Debug) {
+			if (this[PRIVATE.inlineResponseBodyConfigured]) {
+				throw new TypeError(
+					'The inlineResponseBody property cannot be reconfigured'
+				);
+			}
 		}
 
 		this[PRIVATE.inlineResponseBody] = inlineResponseBody;
-		this[PRIVATE.inlineResponseBodyConfigured] = true;
+		if ($Debug) {
+			this[PRIVATE.inlineResponseBodyConfigured] = true;
+		}
 	}
 
 	/**
@@ -237,14 +258,18 @@ export default class AbstractEntity {
 	 *        should be applied to this entity's properties.
 	 */
 	static set propTypes(propTypes) {
-		if (this[PRIVATE.propTypesConfigured]) {
-			throw new TypeError(
-				'The propTypes property cannot be reconfigured'
-			);
+		if ($Debug) {
+			if (this[PRIVATE.propTypesConfigured]) {
+				throw new TypeError(
+					'The propTypes property cannot be reconfigured'
+				);
+			}
 		}
 
 		this[PRIVATE.propTypes] = propTypes;
-		this[PRIVATE.propTypesConfigured] = true;
+		if ($Debug) {
+			this[PRIVATE.propTypesConfigured] = true;
+		}
 	}
 
 	/**
@@ -302,14 +327,18 @@ export default class AbstractEntity {
 	 *        versa.
 	 */
 	static set dataFieldMapping(dataFieldMapping) {
-		if (this[PRIVATE.dataFieldMappingConfigured]) {
-			throw new TypeError(
-				'The dataFieldMapping property cannot be reconfigured'
-			);
+		if ($Debug) {
+			if (this[PRIVATE.dataFieldMappingConfigured]) {
+				throw new TypeError(
+					'The dataFieldMapping property cannot be reconfigured'
+				);
+			}
 		}
 
 		this[PRIVATE.dataFieldMapping] = dataFieldMapping;
-		this[PRIVATE.dataFieldMappingConfigured] = true;
+		if ($Debug) {
+			this[PRIVATE.dataFieldMappingConfigured] = true;
+		}
 	}
 
 	/**
@@ -327,6 +356,9 @@ export default class AbstractEntity {
 	 * of classes extending this one cannot make final adjustments of the
 	 * entity's state once a call to the {@code super}-constructor has been
 	 * made.
+	 *
+	 * Also note that any embedded entity will be skipped over, allowing each
+	 * entity class to have consistent mutability of its instances.
 	 *
 	 * @return {boolean} Whether the instances of this entity class should be
 	 *         made automatically immutable upon instantiation.
@@ -349,14 +381,18 @@ export default class AbstractEntity {
 	 *        should be made automatically immutable upon instantiation.
 	 */
 	static set isImmutable(isImmutable) {
-		if (this[PRIVATE.isImmutableConfigured]) {
-			throw new TypeError(
-				'The isImmutable property cannot be reconfigured'
-			);
+		if ($Debug) {
+			if (this[PRIVATE.isImmutableConfigured]) {
+				throw new TypeError(
+					'The isImmutable property cannot be reconfigured'
+				);
+			}
 		}
 
 		this[PRIVATE.isImmutable] = isImmutable;
-		this[PRIVATE.isImmutableConfigured] = true;
+		if ($Debug) {
+			this[PRIVATE.isImmutableConfigured] = true;
+		}
 	}
 
 	/**
@@ -862,25 +898,5 @@ export default class AbstractEntity {
 	 */
 	$validatePropTypes() {
 		// override this method to enable property type validation
-	}
-
-	/**
-	 * Deeply freezes the provided data.
-	 *
-	 * Note that the method cannot properly handle data with circular
-	 * references.
-	 *
-	 * @param {*} data The data that should become deeply frozen.
-	 */
-	[PRIVATE.deepFreeze](data) {
-		if (!(data instanceof Object)) {
-			return; // primitive values are immutable
-		}
-
-		for (let propertyName of Object.keys(data)) {
-			this[PRIVATE.deepFreeze](data[propertyName]);
-		}
-
-		Object.freeze(data);
 	}
 }
