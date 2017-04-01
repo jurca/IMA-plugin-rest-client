@@ -217,9 +217,7 @@ export default class AbstractEntity {
 		}
 
 		this[PRIVATE.inlineResponseBody] = inlineResponseBody;
-		if ($Debug) {
-			this[PRIVATE.inlineResponseBodyConfigured] = true;
-		}
+		this[PRIVATE.inlineResponseBodyConfigured] = true;
 	}
 
 	/**
