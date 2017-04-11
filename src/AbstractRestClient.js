@@ -1,4 +1,5 @@
 
+import clone from 'clone';
 import AbstractEntity from './AbstractEntity';
 import HttpMethod from './HttpMethod';
 import Request from './Request';
@@ -389,6 +390,15 @@ export default class AbstractRestClient extends RestClient {
 		let body = response.body;
 		let resource = response.request.resource;
 		let parentEntity = response.request.parentEntity;
+
+		// The data has been initially deeply frozen when we created the first
+		// Response object, but the entity is mutable, so we must clone the
+		// data to ensure mutability of deep objects.
+		let mustCloneData = !resource.isImmutable && $Debug;
+		if (mustCloneData) {
+			body = clone(body);
+		}
+
 		if (body instanceof Array) {
 			body = body.map(entityData => new resource(
 				this,
