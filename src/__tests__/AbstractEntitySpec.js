@@ -35,7 +35,7 @@ describe('AbstractEntity', () => {
 			return Promise.resolve(restResult);
 		}
 
-		patch(resource, id, data, options = {}, parentEntity = null) {
+		patch(resource, id, data, parameters = {}, options = {}, parentEntity = null) {
 			calledClientMethods.patch = true;
 			if (restClientCallbacks.patch) {
 				restClientCallbacks.patch(data);
@@ -43,7 +43,7 @@ describe('AbstractEntity', () => {
 			return Promise.resolve(restResult);
 		}
 
-		replace(resource, id, data, options = {}, parentEntity = null) {
+		replace(resource, id, data, parameters = {}, options = {}, parentEntity = null) {
 			calledClientMethods.replace = true;
 			if (restClientCallbacks.replace) {
 				restClientCallbacks.replace(data);
@@ -51,7 +51,7 @@ describe('AbstractEntity', () => {
 			return Promise.resolve(restResult);
 		}
 
-		create(resource, data, options = {}, parentEntity = null) {
+		create(resource, data, parameters = {}, options = {}, parentEntity = null) {
 			calledClientMethods.create = true;
 			if (restClientCallbacks.create) {
 				restClientCallbacks.create(data);
@@ -59,7 +59,7 @@ describe('AbstractEntity', () => {
 			return Promise.resolve(restResult);
 		}
 
-		delete(resource, id, options = {}, parentEntity = null) {
+		delete(resource, id, parameters = {}, options = {}, parentEntity = null) {
 			calledClientMethods.delete = true;
 			return Promise.resolve(restResult);
 		}
