@@ -515,6 +515,9 @@ export default class AbstractEntity {
 	 *        compatible with this entity's structure so that they can be
 	 *        directly assigned to the entity, and will be automatically
 	 *        serialized before submitting to the server.
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -531,7 +534,7 @@ export default class AbstractEntity {
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	static create(restClient, data, options = {}, parentEntity = null) {
+	static create(restClient, data, parameters = {}, options = {}, parentEntity = null) {
 		// We create an entity-like object so that we can serialize the data
 		// and properly create a new entity instance later in the REST API
 		// client.
@@ -543,7 +546,7 @@ export default class AbstractEntity {
 
 		let serializedData = fakeEntity.$serialize();
 
-		return restClient.create(this, serializedData, options, parentEntity);
+		return restClient.create(this, serializedData, parameters, options, parentEntity);
 	}
 
 	/**
