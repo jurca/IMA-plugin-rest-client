@@ -331,91 +331,91 @@ describe('AbstractEntity', () => {
 
 		it('should use deserialized entity data in the patch method',
 				(done) => {
-					let entity = new TransformingEntity(restClient, {
-						test: 'testing',
-						testing: 'test',
-						serialized: true
-					});
-					let patchCalled = false;
-					restClientCallbacks.patch = (data) => {
-						patchCalled = true;
-						expect(data).toEqual({
-							test: 'tested',
-							test2: 1,
-							serialized: true
-						});
-					};
-					entity.patch({
-						test: 'tested',
-						test2: 1,
-						onlyDynamic: true
-					}).then(() => {
-						expect(patchCalled).toBeTruthy();
-						expect(Object.assign({}, entity)).toEqual({
-							test: 'tested',
-							testing: 'test',
-							dynamic: true,
-							onlyDynamic: true,
-							test2: 1
-						});
-						done();
-					});
+			let entity = new TransformingEntity(restClient, {
+				test: 'testing',
+				testing: 'test',
+				serialized: true
+			});
+			let patchCalled = false;
+			restClientCallbacks.patch = (data) => {
+				patchCalled = true;
+				expect(data).toEqual({
+					test: 'tested',
+					test2: 1,
+					serialized: true
 				});
+			};
+			entity.patch({
+				test: 'tested',
+				test2: 1,
+				onlyDynamic: true
+			}).then(() => {
+				expect(patchCalled).toBeTruthy();
+				expect(Object.assign({}, entity)).toEqual({
+					test: 'tested',
+					testing: 'test',
+					dynamic: true,
+					onlyDynamic: true,
+					test2: 1
+				});
+				done();
+			});
+		});
 
 		it('should use deserialized entity data in the replace method',
 				(done) => {
-					let entity = new TransformingEntity(restClient, {
-						test: 'testing',
-						testing: 'test',
-						serialized: true
-					});
-					let replaceCalled = false;
-					restClientCallbacks.replace = (data) => {
-						replaceCalled = true;
-						expect(data).toEqual({
-							test: 'tested',
-							testing: 'test',
-							serialized: true
-						});
-					};
-					entity.test = 'tested';
-					entity.replace().then(() => {
-						expect(replaceCalled).toBeTruthy();
-						expect(Object.assign({}, entity)).toEqual({
-							test: 'tested',
-							testing: 'test',
-							dynamic: true
-						});
-						done();
-					});
+			let entity = new TransformingEntity(restClient, {
+				test: 'testing',
+				testing: 'test',
+				serialized: true
+			});
+			let replaceCalled = false;
+			restClientCallbacks.replace = (data) => {
+				replaceCalled = true;
+				expect(data).toEqual({
+					test: 'tested',
+					testing: 'test',
+					serialized: true
 				});
+			};
+			entity.test = 'tested';
+			entity.replace().then(() => {
+				expect(replaceCalled).toBeTruthy();
+				expect(Object.assign({}, entity)).toEqual({
+					test: 'tested',
+					testing: 'test',
+					dynamic: true
+				});
+				done();
+			});
+		});
 
 		it('should use deserialized entity data in the dynamic create method',
 				(done) => {
-					let entity = new TransformingEntity(restClient, {
-						test: 'testing',
-						testing: 'test',
-						serialized: true
-					});
-					let createCalled = false;
-					restClientCallbacks.create = (data) => {
-						createCalled = true;
-						expect(data).toEqual({
-							test: 'testing',
-							testing: 'test',
-							serialized: true
-						});
-					};
-					entity.create().then(() => {
-						expect(createCalled).toBeTruthy();
-						expect(Object.assign({}, entity)).toEqual({
-							test: 'testing',
-							testing: 'test',
-							dynamic: true
-						});
-						done();
-					});
+			let entity = new TransformingEntity(restClient, {
+				test: 'testing',
+				testing: 'test',
+				serialized: true
+			});
+			let createCalled = false;
+			restClientCallbacks.create = (data) => {
+				createCalled = true;
+				expect(data).toEqual({
+					test: 'testing',
+					testing: 'test',
+					serialized: true
 				});
+			};
+			entity.create().then(() => {
+				expect(createCalled).toBeTruthy();
+				expect(Object.assign({}, entity)).toEqual({
+					test: 'testing',
+					testing: 'test',
+					dynamic: true
+				});
+				done();
+			});
+		});
 
 		it('should allow declarative property mapping', () => {
 			class DeclarativelyMappedEntity extends Entity {
@@ -448,69 +448,69 @@ describe('AbstractEntity', () => {
 
 		it('should allow declarative property mapping using mapper object',
 				() => {
-					class MappingEntity extends Entity {
-						static get dataFieldMapping() {
-							return {
-								id: {
-									dataFieldName: '_id',
-									serialize(value, processedEntity) {
-										expect(
+			class MappingEntity extends Entity {
+				static get dataFieldMapping() {
+					return {
+						id: {
+							dataFieldName: '_id',
+							serialize(value, processedEntity) {
+								expect(
 									processedEntity instanceof MappingEntity
 								).toBe(true);
-										return -value;
-									},
-									deserialize(value, processedEntity) {
-										expect(
+								return -value;
+							},
+							deserialize(value, processedEntity) {
+								expect(
 									processedEntity instanceof MappingEntity
 								).toBe(true);
-										return -value;
-									}
-								},
-								foo: {
-									dataFieldName: null,
-									serialize(value, processedEntity) {
-										return value;
-									},
-									deserialize(value, processedEntity) {
-										return value;
-									}
-								},
-								bar: {
-									dataFieldName: 'bar',
-									serialize(value, processedEntity) {
-										return value;
-									},
-									deserialize(value, processedEntity) {
-										return value;
-									}
-								}
-							};
+								return -value;
+							}
+						},
+						foo: {
+							dataFieldName: null,
+							serialize(value, processedEntity) {
+								return value;
+							},
+							deserialize(value, processedEntity) {
+								return value
+							}
+						},
+						bar: {
+							dataFieldName: 'bar',
+							serialize(value, processedEntity) {
+								return value;
+							},
+							deserialize(value, processedEntity) {
+								return value
+							}
 						}
+					};
+				}
 			}
 
-					let entity = new MappingEntity(restClient, {
-						_id: 123,
-						foo: 'a',
-						bar: 'b'
-					});
-					expect(Object.assign({}, entity)).toEqual({
-						id: -123,
-						foo: 'a',
-						bar: 'b'
-					});
-					expect(entity.$serialize()).toEqual({
-						_id: 123,
-						foo: 'a',
-						bar: 'b'
-					});
-				});
+			let entity = new MappingEntity(restClient, {
+				_id: 123,
+				foo: 'a',
+				bar: 'b'
+			});
+			expect(Object.assign({}, entity)).toEqual({
+				id: -123,
+				foo: 'a',
+				bar: 'b'
+			});
+			expect(entity.$serialize()).toEqual({
+				_id: 123,
+				foo: 'a',
+				bar: 'b'
+			});
+		});
 
 		it('should allow declarative property mapping using mapper classes',
 				() => {
-					class MappingEntity extends Entity {
-						static get dataFieldMapping() {
-							return {
-								id: AbstractDataFieldMapper.makeMapper(
+			class MappingEntity extends Entity {
+				static get dataFieldMapping() {
+					return {
+						id: AbstractDataFieldMapper.makeMapper(
 							'_id',
 							(value, processedEntity) => {
 								expect(
@@ -525,36 +525,36 @@ describe('AbstractEntity', () => {
 								return -value;
 							}
 						),
-								foo: AbstractDataFieldMapper.makeMapper(
+						foo: AbstractDataFieldMapper.makeMapper(
 							null,
 							value => value,
 							value => value
 						),
-								bar: AbstractDataFieldMapper.makeMapper(
+						bar: AbstractDataFieldMapper.makeMapper(
 							'bar',
 							value => value,
 							value => value
 						)
-							};
-						}
+					};
+				}
 			}
 
-					let entity = new MappingEntity(restClient, {
-						_id: 123,
-						foo: 'a',
-						bar: 'b'
-					});
-					expect(Object.assign({}, entity)).toEqual({
-						id: -123,
-						foo: 'a',
-						bar: 'b'
-					});
-					expect(entity.$serialize()).toEqual({
-						_id: 123,
-						foo: 'a',
-						bar: 'b'
-					});
-				});
+			let entity = new MappingEntity(restClient, {
+				_id: 123,
+				foo: 'a',
+				bar: 'b'
+			});
+			expect(Object.assign({}, entity)).toEqual({
+				id: -123,
+				foo: 'a',
+				bar: 'b'
+			});
+			expect(entity.$serialize()).toEqual({
+				_id: 123,
+				foo: 'a',
+				bar: 'b'
+			});
+		});
 
 		it('should allow create field mappers from entity classes', () => {
 			class Session extends Entity {}
@@ -719,8 +719,8 @@ describe('AbstractEntity', () => {
 
 		it('should be possible to configure inlineResponseBody exactly once',
 				() => {
-					testStaticProperty('inlineResponseBody', false, false, true);
-				});
+			testStaticProperty('inlineResponseBody', false, false, true);
+		});
 
 		it('should be possible to configure propTypes exactly once', () => {
 			testStaticProperty('propTypes', {}, false, { id: 'integer:>0' });
@@ -728,8 +728,8 @@ describe('AbstractEntity', () => {
 
 		it('should be possible to configure dataFieldMapping exactly once',
 				() => {
-					testStaticProperty('dataFieldMapping', {}, false, { id: '_id' });
-				});
+			testStaticProperty('dataFieldMapping', {}, false, { id: '_id' });
+		});
 
 		it('should be possible to configure isImmutable exactly once', () => {
 			testStaticProperty('isImmutable', false, false, true);
