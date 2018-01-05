@@ -126,13 +126,13 @@ export default class AbstractRestClient extends RestClient {
 	 * @inheritdoc
 	 * @override
 	 */
-	patch(resource, id, data, options = {}, parentEntity = null) {
+	patch(resource, id, data, parameters = {}, options = {}, parentEntity = null) {
 		return this._prepareAndExecuteRequest(
 			HttpMethod.PATCH,
 			parentEntity,
 			resource,
 			id,
-			{},
+			parameters,
 			data,
 			options
 		);
@@ -142,13 +142,13 @@ export default class AbstractRestClient extends RestClient {
 	 * @inheritdoc
 	 * @override
 	 */
-	replace(resource, id, data, options = {}, parentEntity = null) {
+	replace(resource, id, data, parameters = {}, options = {}, parentEntity = null) {
 		return this._prepareAndExecuteRequest(
 			HttpMethod.PUT,
 			parentEntity,
 			resource,
 			id,
-			{},
+			parameters,
 			data,
 			options
 		);
@@ -158,13 +158,13 @@ export default class AbstractRestClient extends RestClient {
 	 * @inheritdoc
 	 * @override
 	 */
-	create(resource, data, options = {}, parentEntity = null) {
+	create(resource, data, parameters = {}, options = {}, parentEntity = null) {
 		return this._prepareAndExecuteRequest(
 			HttpMethod.POST,
 			parentEntity,
 			resource,
 			null,
-			{},
+			parameters,
 			data,
 			options
 		);
@@ -174,13 +174,13 @@ export default class AbstractRestClient extends RestClient {
 	 * @inheritdoc
 	 * @override
 	 */
-	delete(resource, id, options = {}, parentEntity = null) {
+	delete(resource, id, parameters = {}, options = {}, parentEntity = null) {
 		return this._prepareAndExecuteRequest(
 			HttpMethod.DELETE,
 			parentEntity,
 			resource,
 			id,
-			{},
+			parameters,
 			null,
 			options
 		);

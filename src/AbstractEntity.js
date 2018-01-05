@@ -515,6 +515,9 @@ export default class AbstractEntity {
 	 *        compatible with this entity's structure so that they can be
 	 *        directly assigned to the entity, and will be automatically
 	 *        serialized before submitting to the server.
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -531,7 +534,7 @@ export default class AbstractEntity {
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	static create(restClient, data, options = {}, parentEntity = null) {
+	static create(restClient, data, parameters = {}, options = {}, parentEntity = null) {
 		// We create an entity-like object so that we can serialize the data
 		// and properly create a new entity instance later in the REST API
 		// client.
@@ -543,7 +546,7 @@ export default class AbstractEntity {
 
 		let serializedData = fakeEntity.$serialize();
 
-		return restClient.create(this, serializedData, options, parentEntity);
+		return restClient.create(this, serializedData, parameters, options, parentEntity);
 	}
 
 	/**
@@ -554,6 +557,9 @@ export default class AbstractEntity {
 	 *        request should be made.
 	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
 	 *        entity or group of entities to retrieve.
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -570,8 +576,8 @@ export default class AbstractEntity {
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	static delete(restClient, id, options = {}, parentEntity = null) {
-		return restClient.delete(this, id, options, parentEntity);
+	static delete(restClient, id, parameters = {}, options = {}, parentEntity = null) {
+		return restClient.delete(this, id, parameters, options, parentEntity);
 	}
 
 	/**
@@ -653,6 +659,9 @@ export default class AbstractEntity {
 	 *        structure so that they can be directly assigned to the entity,
 	 *        and will be automatically serialized before submitting to the
 	 *        server.
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -667,7 +676,7 @@ export default class AbstractEntity {
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	patch(data, options = {}) {
+	patch(data, parameters = {}, options = {}) {
 		let resource = this.constructor;
 		let id = this[resource.idFieldName];
 		let client = this[PRIVATE.restClient];
@@ -676,6 +685,7 @@ export default class AbstractEntity {
 			resource,
 			id,
 			serializedData,
+			parameters,
 			options
 		).then((response) => {
 			if (!resource.isImmutable) {
@@ -690,6 +700,9 @@ export default class AbstractEntity {
 	 * Replaces this entity in the REST API resource with this entity's current
 	 * state.
 	 *
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -704,16 +717,19 @@ export default class AbstractEntity {
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	replace(options = {}) {
+	replace(parameters = {}, options = {}) {
 		let resource = this.constructor;
 		let id = this[resource.idFieldName];
 		let client = this[PRIVATE.restClient];
-		return client.replace(resource, id, this.$serialize(), options);
+		return client.replace(resource, id, this.$serialize(), parameters, options);
 	}
 
 	/**
 	 * Creates this entity in the REST API resource it belongs to.
 	 *
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -728,14 +744,17 @@ export default class AbstractEntity {
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	create(options = {}) {
+	create(parameters = {}, options = {}) {
 		let client = this[PRIVATE.restClient];
-		return client.create(this.constructor, this.$serialize(), options);
+		return client.create(this.constructor, this.$serialize(), parameters, options);
 	}
 
 	/**
 	 * Deletes this entity from its resource.
 	 *
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -750,9 +769,9 @@ export default class AbstractEntity {
 	 *         entities or {@code null} constructed from the response body if
 	 *         this entity class has the {@code inlineResponseBody} flag set.
 	 */
-	delete(options = {}) {
+	delete(parameters = {}, options = {}) {
 		let id = this[this.constructor.idFieldName];
-		return this.constructor.delete(this[PRIVATE.restClient], id, options);
+		return this.constructor.delete(this[PRIVATE.restClient], id, parameters, options);
 	}
 
 	/**

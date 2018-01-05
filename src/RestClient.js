@@ -96,6 +96,9 @@ export default class RestClient {
 	 *        entity or group of entities to modify.
 	 * @param {*} data The data representing the modifications to make to the
 	 *        entity.
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -115,7 +118,7 @@ export default class RestClient {
 	 *         the resource is a class extending the {@code AbstractEntity}
 	 *         class and has the {@code inlineResponseBody} flag set.
 	 */
-	patch(resource, id, data, options = {}, parentEntity = null) {}
+	patch(resource, id, data, parameters = {}, options = {}, parentEntity = null) {}
 
 	/**
 	 * Replaces the specified entity in the specified REST resource by a new
@@ -128,6 +131,9 @@ export default class RestClient {
 	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
 	 *        entity or group of entities to replace.
 	 * @param {*} data The data representing the entity.
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -147,7 +153,7 @@ export default class RestClient {
 	 *         the resource is a class extending the {@code AbstractEntity}
 	 *         class and has the {@code inlineResponseBody} flag set.
 	 */
-	replace(resource, id, data, options = {}, parentEntity = null) {}
+	replace(resource, id, data, parameters = {}, options = {}, parentEntity = null) {}
 
 	/**
 	 * Creates a new entity using the provided data in the specified REST
@@ -158,6 +164,9 @@ export default class RestClient {
 	 *
 	 * @param {*} resource The resource in which the entity should be created.
 	 * @param {*} data The data representing the entity.
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -177,7 +186,7 @@ export default class RestClient {
 	 *         the resource is a class extending the {@code AbstractEntity}
 	 *         class and has the {@code inlineResponseBody} flag set.
 	 */
-	create(resource, data, options = {}, parentEntity = null) {}
+	create(resource, data, parameters = {}, options = {}, parentEntity = null) {}
 
 	/**
 	 * Deletes the resource entity identified by the specified ID from the
@@ -190,6 +199,9 @@ export default class RestClient {
 	 *        deleted.
 	 * @param {(number|string|(number|string)[])} id The ID(s) identifying the
 	 *        entity or group of entities to delete.
+	 * @param {Object<string, (number|string|(number|string)[])>=} parameters
+	 *        The additional parameters to send to the server with the request
+	 *        to configure the server's response.
 	 * @param {{
 	 *            timeout: number=,
 	 *            ttl: number=,
@@ -209,5 +221,5 @@ export default class RestClient {
 	 *         the resource is a class extending the {@code AbstractEntity}
 	 *         class and has the {@code inlineResponseBody} flag set.
 	 */
-	delete(resource, id, options = {}, parentEntity = null) {}
+	delete(resource, id, parameters = {}, options = {}, parentEntity = null) {}
 }
